@@ -30,8 +30,8 @@ int yywrap()
 
 %union
 {
-        int number;
-        char* string;
+    int number;
+    char* string;
 }
 
 %token <number> NUMBER
