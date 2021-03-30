@@ -88,7 +88,7 @@ cd_case:
     };
 
 ls_case:
-    |LS EOLN
+    LS EOLN
     {
         builtin = 0;
         DIR *directory;
