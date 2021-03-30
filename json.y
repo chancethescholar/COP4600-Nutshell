@@ -56,36 +56,38 @@ unsetenv_case:
 tilde_case:
 
 cd_case:
-    |CD EOLN 
+    |CD EOLN
     {
         builtin = 1;
         printf("\tDirectory changed to Home\n");
         chdir(getenv("HOME"));
     }
 
-    |CD HOME EOLN 
+    |CD HOME EOLN
     {
         builtin = 1;
         printf("\tDirectory changed to Home\n");
         chdir(getenv("HOME"));
     }
 
-    |CD ROOT EOLN 
+    |CD ROOT EOLN
     {
          builtin = 1;
          printf("\tDirectory changed to root\n");
          chdir("/");
     }
 
-    |CD TILDE EOLN 
+    |CD TILDE EOLN
     {
-         
+
     }
 
     |CD FILENAME EOLN
     {
 
     };
+
+EOLN_case:
 
 ls_case:
     LS EOLN
@@ -94,36 +96,34 @@ ls_case:
         DIR *directory;
         directory = opendir(".");
     	struct dirent *dp;
-    	if(directory) 
+    	if(directory)
         {
-            dp = readdir(directory);
-    		while((dp != NULL) 
+    		while((dp = readdir(directory)) != NULL)
             {
     	        printf("%s\n", dp -> d_name);
     		}
     		closedir(directory);
     	}
-            
+
     	else
     		printf("not valid");
     }
-    
+
     |LS FILENAME EOLN
     {
         builtin = 0;
         DIR *directory;
         directory = opendir($2);
         struct dirent *dp;
-        if(directory) 
+        if(directory)
         {
-            dp = readdir(directory);
-            while(dp != NULL) 
+            while((dp = readdir(directory)) != NULL)
             {
                 printf("%s\n", dp -> d_name);
             }
             closedir(directory);
          }
-                		
+
          else
             printf("not valid");
     };
@@ -133,9 +133,9 @@ alias_case:
 unalias_case:
 
 bye_case:
-    BYE 
+    BYE
     {
-        printf("\t goodbye! \n"); 
+        printf("\t goodbye! \n");
         exit(0);
     };
 
@@ -158,5 +158,6 @@ doublequote:
 backslash:
 
 ampersand:
+
 
 %%
