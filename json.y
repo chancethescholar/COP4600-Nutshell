@@ -46,3 +46,5 @@ commands: /* empty */
 
 command:
     setenv_case|printenv_case|unsetenv_case|cd_case|ls_case|EOLN_case|alias_case|unalias_case|bye_case|number_case|filename_case|tilde_case|metach_case;
+
+%%
