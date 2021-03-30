@@ -47,4 +47,116 @@ commands: /* empty */
 command:
     setenv_case|printenv_case|unsetenv_case|cd_case|ls_case|EOLN_case|alias_case|unalias_case|bye_case|number_case|filename_case|tilde_case|metach_case;
 
+setenv_case:
+
+printenv_case:
+
+unsetenv_case:
+
+tilde_case:
+
+cd_case:
+    |CD EOLN 
+    {
+        builtin = 1;
+        printf("\tDirectory changed to Home\n");
+        chdir(getenv("HOME"));
+    }
+
+    |CD HOME EOLN 
+    {
+        builtin = 1;
+        printf("\tDirectory changed to Home\n");
+        chdir(getenv("HOME"));
+    }
+
+    |CD ROOT EOLN 
+    {
+         builtin = 1;
+         printf("\tDirectory changed to root\n");
+         chdir("/");
+    }
+
+    |CD TILDE EOLN 
+    {
+         
+    }
+
+    |CD FILENAME EOLN
+    {
+
+    };
+
+ls_case:
+    |LS EOLN
+    {
+        builtin = 0;
+        DIR *directory;
+        directory = opendir(".");
+    	struct dirent *dp;
+    	if(directory) 
+        {
+            dp = readdir(directory);
+    		while((dp != NULL) 
+            {
+    	        printf("%s\n", dp -> d_name);
+    		}
+    		closedir(directory);
+    	}
+            
+    	else
+    		printf("not valid");
+    }
+    
+    |LS FILENAME EOLN
+    {
+        builtin = 0;
+        DIR *directory;
+        directory = opendir($2);
+        struct dirent *dp;
+        if(directory) 
+        {
+            dp = readdir(directory);
+            while(dp != NULL) 
+            {
+                printf("%s\n", dp -> d_name);
+            }
+            closedir(directory);
+         }
+                		
+         else
+            printf("not valid");
+    };
+
+alias_case:
+
+unalias_case:
+
+bye_case:
+    BYE 
+    {
+        printf("\t goodbye! \n"); 
+        exit(0);
+    };
+
+number_case:
+
+filename_case:
+
+word_case:
+
+metach_case:
+
+lessthan:
+
+greaterthan:
+
+pipe:
+
+doublequote:
+
+backslash:
+
+ampersand:
+
 %%
