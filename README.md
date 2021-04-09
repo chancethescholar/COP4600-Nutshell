@@ -8,4 +8,4 @@ lex shell.l
 
 gcc -ll y.tab.c lex.yy.c
 
-./shell
+./nutshell
