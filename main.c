@@ -418,27 +418,12 @@ void execute()
 
 int contain_char(char* string, char character)
 {
-	int i = 0;
-	while (i != strlen(string)){
-		if (string[i] == character){
+	for(int i = 0; i != strlen(string); i++)
+	{
+		if (string[i] == character)
+		{
 			return 1;
 		}
-		i++;
 	}
 	return 0;
-}
-
-char* combine_string(char* string1, char* string2)
-{
-	char* newString = (char *)malloc((strlen(string1)+strlen(string2)+1)*sizeof(char));
-	strcpy(newString, string1);
-	strcat(newString, string2);
-	return newString;
-}
-
-void setSignal()
-{
-	printf("\n");
-	printf("nutshell> ");
-	fflush(stdout);  //flush a stream
 }

@@ -60,6 +60,5 @@ void execute(); //to execute commands
 void prompt();
 void setSignal();
 int contain_char(char*, char);
-char* combine_string(char*, char*);
 
 #endif

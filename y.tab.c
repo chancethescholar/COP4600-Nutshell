@@ -457,9 +457,9 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    45,    45,    47,    50,    53,    58,    61,    65,    85,
-      84,    89,    93,    99,   100,   103,   133,   144,   145,   149,
-     156,   162,   169,   176,   182,   185,   191,   195
+       0,    37,    37,    38,    41,    44,    49,    52,    56,    76,
+      75,    80,    84,    90,    91,    94,   124,   135,   136,   140,
+     147,   153,   160,   167,   173,   178,   185,   189
 };
 #endif
 
@@ -1379,12 +1379,12 @@ yyreduce:
   switch (yyn)
     {
         case 3:
-#line 47 "shell.y"
+#line 38 "shell.y"
     {printf("%s","nutshell> ");}
     break;
 
   case 5:
-#line 53 "shell.y"
+#line 44 "shell.y"
     {
 	execute(); // execute, complete command in command table
 
@@ -1393,19 +1393,19 @@ yyreduce:
     break;
 
   case 6:
-#line 58 "shell.y"
+#line 49 "shell.y"
     {
 
 }
     break;
 
   case 7:
-#line 61 "shell.y"
+#line 52 "shell.y"
     { yyerrok; }
     break;
 
   case 8:
-#line 66 "shell.y"
+#line 57 "shell.y"
     {
 		DIR *dir;
 		dir = opendir(".");
@@ -1424,7 +1424,7 @@ yyreduce:
     break;
 
   case 9:
-#line 85 "shell.y"
+#line 76 "shell.y"
     {
 	currentCom++; //another new simple command create by increase command table array index
 
@@ -1432,14 +1432,14 @@ yyreduce:
     break;
 
   case 12:
-#line 93 "shell.y"
+#line 84 "shell.y"
     {
 
 }
     break;
 
   case 15:
-#line 104 "shell.y"
+#line 95 "shell.y"
     {
 	if(contain_char((yyvsp[(1) - (1)].stringvalue), '?') || contain_char((yyvsp[(1) - (1)].stringvalue), '*') )// whildcard reconize from tokens
 	{
@@ -1469,7 +1469,7 @@ yyreduce:
     break;
 
   case 16:
-#line 134 "shell.y"
+#line 125 "shell.y"
     {
 	//every command star with cmd XXXXX here we initial command element
 	commands[currentCom].comName = (yyvsp[(1) - (1)].stringvalue);
@@ -1480,7 +1480,7 @@ yyreduce:
     break;
 
   case 19:
-#line 150 "shell.y"
+#line 141 "shell.y"
     {
 	openPermission = O_WRONLY | O_CREAT | O_APPEND ;// APPEND mode
 
@@ -1489,7 +1489,7 @@ yyreduce:
     break;
 
   case 20:
-#line 157 "shell.y"
+#line 148 "shell.y"
     {
 	openPermission = O_WRONLY  | O_TRUNC| O_CREAT; //insert is creat mode
 	outfileName = (yyvsp[(2) - (2)].stringvalue);
@@ -1497,7 +1497,7 @@ yyreduce:
     break;
 
   case 21:
-#line 163 "shell.y"
+#line 154 "shell.y"
     {
 	openPermission = O_WRONLY  | O_CREAT| O_APPEND;
 	outfileName = (yyvsp[(2) - (2)].stringvalue);
@@ -1506,7 +1506,7 @@ yyreduce:
     break;
 
   case 22:
-#line 170 "shell.y"
+#line 161 "shell.y"
     {
 	openPermission = O_WRONLY  | O_TRUNC| O_CREAT;
 	//outfileName = $2;
@@ -1515,7 +1515,7 @@ yyreduce:
     break;
 
   case 23:
-#line 177 "shell.y"
+#line 168 "shell.y"
     {
 	openPermission = O_WRONLY | O_TRUNC| O_CREAT ;
 	errFileName = (yyvsp[(2) - (2)].stringvalue);
@@ -1523,21 +1523,21 @@ yyreduce:
     break;
 
   case 24:
-#line 182 "shell.y"
-    {/*printf("    2>&1 %s \n", $2);*/
+#line 174 "shell.y"
+    {
 	errFileName = "error";
 }
     break;
 
   case 25:
-#line 185 "shell.y"
-    {/*printf("    < %s \n", $2);*/
+#line 179 "shell.y"
+    {
 	infileName = (yyvsp[(2) - (2)].stringvalue);
 }
     break;
 
   case 26:
-#line 192 "shell.y"
+#line 186 "shell.y"
     {
 	background = 1; //indicate background
 }
@@ -1759,6 +1759,6 @@ yyreturn:
 }
 
 
-#line 197 "shell.y"
+#line 191 "shell.y"
 
 
