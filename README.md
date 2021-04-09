@@ -15,4 +15,6 @@ gcc -ll y.tab.c lex.yy.c
 
 make
 
-gcc main.c PARSER.tab.c lex.yy.c -o main -lfl
+gcc main.c PARSER.tab.c lex.yy.c -o main
+
+./main
