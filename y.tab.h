@@ -42,44 +42,46 @@
      WORD = 258,
      NOTOKEN = 259,
      NEWLINE = 260,
-     GT = 261,
-     LT = 262,
-     PIPE = 263,
-     ERRORF = 264,
-     ERROR1 = 265,
-     AND = 266,
-     GTGT = 267,
-     GTGTAND = 268,
-     GTAND = 269,
-     TERMINATOR = 270
+     LS = 261,
+     GT = 262,
+     LT = 263,
+     PIPE = 264,
+     ERRORF = 265,
+     ERROR1 = 266,
+     AND = 267,
+     GTGT = 268,
+     GTGTAND = 269,
+     GTAND = 270,
+     TERMINATOR = 271
    };
 #endif
 /* Tokens.  */
 #define WORD 258
 #define NOTOKEN 259
 #define NEWLINE 260
-#define GT 261
-#define LT 262
-#define PIPE 263
-#define ERRORF 264
-#define ERROR1 265
-#define AND 266
-#define GTGT 267
-#define GTGTAND 268
-#define GTAND 269
-#define TERMINATOR 270
+#define LS 261
+#define GT 262
+#define LT 263
+#define PIPE 264
+#define ERRORF 265
+#define ERROR1 266
+#define AND 267
+#define GTGT 268
+#define GTGTAND 269
+#define GTAND 270
+#define TERMINATOR 271
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 14 "shell.y"
+#line 31 "shell.y"
 {
 	char   *stringvalue;
 }
 /* Line 1529 of yacc.c.  */
-#line 83 "y.tab.h"
+#line 85 "y.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

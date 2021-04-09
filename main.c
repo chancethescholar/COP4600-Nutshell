@@ -413,7 +413,6 @@ void execute()
 	errFileName = NULL;
 	openPermission = 0;
 
-	printf("nutshell> ");
 	fflush(stdout);  //flush stream
 }
 

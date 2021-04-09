@@ -7,20 +7,21 @@
 %%
 
 
-\n		{return NEWLINE;}
-"<"		{return LT;}
-">"		{return GT;}
-">>"	{return GTGT;}
-">&"	{return GTAND;}
-">>&"	{return GTGTAND;}
-"|" 	{return PIPE;}
-"2>"	{return ERRORF;}
-"2>&1"	{return ERROR1;}
-"&" 	{ return AND;}
-[ \t]	{}	//igbnore tab, white space
+\n		return NEWLINE;
+"<"		return LT;
+">"		return GT;
+">>"	return GTGT;
+">&"	return GTAND;
+">>&"	return GTGTAND;
+"|" 	return PIPE;
+"2>"	return ERRORF;
+"2>&1"	return ERROR1;
+"&"		return AND;
+ls		return LS;
+[ \t]	{}	//ignore tab, white space
 
 
-\"[^\n\"]*\" {//ignore ""
+\"[^\n\"]*\" { //ignore quotations
 yytext = (char*)(yytext+1); // delete quotes
 yytext[ strlen(yytext) - 1 ] = '\0'; // delete last quotes
 

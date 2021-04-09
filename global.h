@@ -25,7 +25,6 @@ typedef struct Node
 	struct Node* next;
 } Node;
 
-
 Node* head = NULL;
 int aliasSize = 0; //size of alias list
 //std::map<char*, char*> aliases;
