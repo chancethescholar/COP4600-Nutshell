@@ -107,24 +107,6 @@
 #include <string.h>
 #include "main.c"
 
-char* environmentVariable(char*);
-void escape(char*);
-char* tildeExpansion(char*);
-int yyval();
-int yywrap();
-
-void yyerror(const char * s)
-{
-
-	fprintf(stderr, "Error at line %d: %s!\n",yylineno,s);
-}
-
-int yywrap()
-{
-	return 1;
-}
-
-
 
 
 /* Enabling traces.  */
@@ -147,12 +129,12 @@ int yywrap()
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 32 "shell.y"
+#line 14 "shell.y"
 {
 	char   *stringvalue;
 }
 /* Line 193 of yacc.c.  */
-#line 156 "y.tab.c"
+#line 138 "y.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -165,7 +147,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 169 "y.tab.c"
+#line 151 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -456,9 +438,9 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    41,    41,    45,    46,    50,    57,    60,    64,    64,
-      68,    72,    78,    79,    82,   111,   121,   122,   126,   131,
-     135,   140,   146,   151,   154,   160,   163
+       0,    23,    23,    27,    28,    32,    39,    42,    46,    46,
+      50,    54,    60,    61,    64,    93,   103,   104,   108,   113,
+     117,   122,   128,   133,   136,   142,   145
 };
 #endif
 
@@ -1382,7 +1364,7 @@ yyreduce:
   switch (yyn)
     {
         case 5:
-#line 50 "shell.y"
+#line 32 "shell.y"
     {
 	//printf(" execute \n");
 	//printcmdt();
@@ -1393,34 +1375,34 @@ yyreduce:
     break;
 
   case 6:
-#line 57 "shell.y"
+#line 39 "shell.y"
     {
 
 }
     break;
 
   case 7:
-#line 60 "shell.y"
+#line 42 "shell.y"
     { yyerrok; }
     break;
 
   case 8:
-#line 64 "shell.y"
+#line 46 "shell.y"
     {
-	currcmd++; //another new simple command create by increase command table array index
+	currentCom++; //another new simple command create by increase command table array index
 
 }
     break;
 
   case 11:
-#line 72 "shell.y"
+#line 54 "shell.y"
     {
 
 }
     break;
 
   case 14:
-#line 82 "shell.y"
+#line 64 "shell.y"
     { // printf(" argument %s ", $1);
 
 	if (contain_char((yyvsp[(1) - (1)].stringvalue), '?') || contain_char((yyvsp[(1) - (1)].stringvalue), '*') )// whildcard reconize from tokens
@@ -1436,32 +1418,32 @@ yyreduce:
 
 			for (i = 0; i < pattern.gl_pathc; i++)// for loop to add each matching pattern to arguments in same simple command
 			{
-				commands[currcmd].numArgs++;
-				commands[currcmd].args[commands[currcmd].numArgs]=strdup(pattern.gl_pathv[i]);
+				commands[currentCom].numArgs++;
+				commands[currentCom].args[commands[currentCom].numArgs]=strdup(pattern.gl_pathv[i]);
 			}
 		}
 	}
 	else{
 		//cannot find any match pattern just add *?pattern as argument
-		commands[currcmd].numArgs++;
-		commands[currcmd].args[commands[currcmd].numArgs]=(yyvsp[(1) - (1)].stringvalue);
+		commands[currentCom].numArgs++;
+		commands[currentCom].args[commands[currentCom].numArgs]=(yyvsp[(1) - (1)].stringvalue);
 	}
 }
     break;
 
   case 15:
-#line 111 "shell.y"
+#line 93 "shell.y"
     {//printf("command is \n", $1);
-	//every command star with cmd XXXXX here we inital command element
-	commands[currcmd].comName=(yyvsp[(1) - (1)].stringvalue);
-	commands[currcmd].args[0]=(yyvsp[(1) - (1)].stringvalue);
-	commands[currcmd].numArgs = 0;
+	//every command star with cmd XXXXX here we initial command element
+	commands[currentCom].comName=(yyvsp[(1) - (1)].stringvalue);
+	commands[currentCom].args[0]=(yyvsp[(1) - (1)].stringvalue);
+	commands[currentCom].numArgs = 0;
 
 }
     break;
 
   case 18:
-#line 126 "shell.y"
+#line 108 "shell.y"
     {
 	openPermission = O_WRONLY | O_CREAT | O_APPEND ;// APPEND mode
 
@@ -1470,7 +1452,7 @@ yyreduce:
     break;
 
   case 19:
-#line 131 "shell.y"
+#line 113 "shell.y"
     {
 	openPermission = O_WRONLY  | O_TRUNC| O_CREAT; //insert is creat mode
 	outfileName=(yyvsp[(2) - (2)].stringvalue);
@@ -1478,7 +1460,7 @@ yyreduce:
     break;
 
   case 20:
-#line 135 "shell.y"
+#line 117 "shell.y"
     {
 	openPermission = O_WRONLY  | O_CREAT| O_APPEND;
 	outfileName = (yyvsp[(2) - (2)].stringvalue);
@@ -1487,7 +1469,7 @@ yyreduce:
     break;
 
   case 21:
-#line 140 "shell.y"
+#line 122 "shell.y"
     {/*printf("    > %s \n", $2);*/
 	openPermission = O_WRONLY  | O_TRUNC| O_CREAT;
 	//outfileName = $2;
@@ -1496,7 +1478,7 @@ yyreduce:
     break;
 
   case 22:
-#line 146 "shell.y"
+#line 128 "shell.y"
     {/*printf("    2> %s \n", $2);*/
 	openPermission = O_WRONLY | O_TRUNC| O_CREAT ;
 	errFileName=(yyvsp[(2) - (2)].stringvalue);
@@ -1504,21 +1486,21 @@ yyreduce:
     break;
 
   case 23:
-#line 151 "shell.y"
+#line 133 "shell.y"
     {/*printf("    2>&1 %s \n", $2);*/
 	errFileName="error";
 }
     break;
 
   case 24:
-#line 154 "shell.y"
+#line 136 "shell.y"
     {/*printf("    < %s \n", $2);*/
 	infileName=(yyvsp[(2) - (2)].stringvalue);
 }
     break;
 
   case 25:
-#line 160 "shell.y"
+#line 142 "shell.y"
     {//printf(" enter & \n");
 	background = 1; //indicate background
 }
@@ -1526,7 +1508,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1530 "y.tab.c"
+#line 1512 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1740,6 +1722,18 @@ yyreturn:
 }
 
 
-#line 165 "shell.y"
+#line 147 "shell.y"
 
+
+void
+yyerror(const char * s)
+{
+
+	fprintf(stderr, "Error at line %d: %s!\n",yylineno,s);
+}
+
+int yywrap()
+{
+	return 1;
+}
 

@@ -476,17 +476,10 @@ int yy_flex_debug = 0;
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
 #line 1 "shell.l"
-#line 3 "shell.l"
+#line 2 "shell.l"
 #include <string.h>
 #include "y.tab.h"
-
-char* environmentVariable(char*);
-void escape(char*);
-char* tildeExpansion(char*);
-int yyval();
-int yywrap();
-
-#line 490 "lex.yy.c"
+#line 483 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -668,11 +661,11 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 16 "shell.l"
+#line 7 "shell.l"
 
 
 
-#line 676 "lex.yy.c"
+#line 669 "lex.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -768,90 +761,85 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 19 "shell.l"
+#line 10 "shell.l"
 {return NEWLINE;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 20 "shell.l"
+#line 11 "shell.l"
 {return LT;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 21 "shell.l"
+#line 12 "shell.l"
 {return GT;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 22 "shell.l"
+#line 13 "shell.l"
 {return GTGT;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 23 "shell.l"
+#line 14 "shell.l"
 {return GTAND;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 24 "shell.l"
+#line 15 "shell.l"
 {return GTGTAND;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 25 "shell.l"
+#line 16 "shell.l"
 {return PIPE;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 26 "shell.l"
+#line 17 "shell.l"
 {return ERRORF;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 27 "shell.l"
+#line 18 "shell.l"
 {return ERROR1;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 28 "shell.l"
+#line 19 "shell.l"
 { return AND;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 29 "shell.l"
-{}	//igbnore tab, white space	
+#line 20 "shell.l"
+{}	//igbnore tab, white space
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 32 "shell.l"
-{//ignore ""  
+#line 23 "shell.l"
+{//ignore ""
 yytext = (char*)(yytext+1); // delete quotes
 yytext[ strlen(yytext) - 1 ] = '\0'; // delete last quotes
 
 yylval.stringvalue = strdup(yytext);
-yylval.stringvalue= environmentVariable(yylval.stringvalue);
-escape(yylval.stringvalue);
 
 return WORD;
 }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 43 "shell.l"
+#line 32 "shell.l"
 {// reconnize everything else token
 		yylval.stringvalue = strdup(yytext);
-		yylval.stringvalue= environmentVariable(yylval.stringvalue);
-		yylval.stringvalue = tildeExpansion(yylval.stringvalue);
-		escape(yylval.stringvalue);
 		return WORD;
 	}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 51 "shell.l"
+#line 37 "shell.l"
 ECHO;
 	YY_BREAK
-#line 855 "lex.yy.c"
+#line 843 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1860,9 +1848,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 51 "shell.l"
-
-
+#line 37 "shell.l"
 
 
 

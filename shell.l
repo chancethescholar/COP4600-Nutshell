@@ -1,18 +1,9 @@
-
 %{
 #include <string.h>
 #include "y.tab.h"
-
-char* environmentVariable(char*);
-void escape(char*);
-char* tildeExpansion(char*);
-int yyval();
-int yywrap();
-
 %}
 
 %option yylineno
-
 %%
 
 
@@ -26,28 +17,21 @@ int yywrap();
 "2>"	{return ERRORF;}
 "2>&1"	{return ERROR1;}
 "&" 	{ return AND;}
-[ \t]	{}	//igbnore tab, white space	
+[ \t]	{}	//igbnore tab, white space
 
 
-\"[^\n\"]*\" {//ignore ""  
+\"[^\n\"]*\" {//ignore ""
 yytext = (char*)(yytext+1); // delete quotes
 yytext[ strlen(yytext) - 1 ] = '\0'; // delete last quotes
 
 yylval.stringvalue = strdup(yytext);
-yylval.stringvalue= environmentVariable(yylval.stringvalue);
-escape(yylval.stringvalue);
 
 return WORD;
 }
 
 [^ \t\n][^ \t\n]*  {// reconnize everything else token
 		yylval.stringvalue = strdup(yytext);
-		yylval.stringvalue= environmentVariable(yylval.stringvalue);
-		yylval.stringvalue = tildeExpansion(yylval.stringvalue);
-		escape(yylval.stringvalue);
 		return WORD;
 	}
 
 %%
-
-

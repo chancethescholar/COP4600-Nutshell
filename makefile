@@ -1,7 +1,7 @@
-all: shell
+all: nutshell
 	
-shell: y.tab.o lex.yy.o global.h
-	cc lex.yy.o y.tab.o -o shell
+nutshell: y.tab.o lex.yy.o global.h
+	cc lex.yy.o y.tab.o -o nutshell
 
 main.o: main.c global.h
 	cc main.c

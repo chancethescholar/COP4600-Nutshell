@@ -34,9 +34,9 @@ char* infileName = NULL;  //in file description
 char* outfileName = NULL;	//out file description
 char* errFileName = NULL; //error file  description
 int openPermission = 0; //open option
-int background = 0; //check & background or not
+int background = 0;
 
-typedef struct com
+typedef struct command
 {
 	char* comName; //command name
 	int numArgs; //number of arguments
@@ -47,23 +47,20 @@ typedef struct com
 
 COMMAND commands[500]; //initial command table
 
-int currcmd= 0; // current cmd index
+int currentCom = 0; //current commad index
 
 void yyerror(const char * s);
 int yylex();
 int yyparse();
-void alias_print();
+void aliasPrint();
 void alias(char*, char*);
 void unalias(char*);
 char* searchAlias(char*);
 void printenv();
-void execute(); //to execute command
-char* environmentVariable(char*);
-char* tildeExpansion(char*);
+void execute(); //to execute commands
 void prompt();
 void setSignal();
 int contain_char(char*, char);
 char* combine_string(char*, char*);
-void escape(char*);
 
 #endif

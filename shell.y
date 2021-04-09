@@ -4,24 +4,6 @@
 #include <string.h>
 #include "main.c"
 
-char* environmentVariable(char*);
-void escape(char*);
-char* tildeExpansion(char*);
-int yyval();
-int yywrap();
-
-void yyerror(const char * s)
-{
-
-	fprintf(stderr, "Error at line %d: %s!\n",yylineno,s);
-}
-
-int yywrap()
-{
-	return 1;
-}
-
-
 %}
 
 
@@ -62,7 +44,7 @@ pipeline io_redirection   background NEWLINE {
 
 pipeline:
 pipeline PIPE {
-	currcmd++; //another new simple command create by increase command table array index
+	currentCom++; //another new simple command create by increase command table array index
 
 } command_arguments
 | command_arguments
@@ -94,25 +76,25 @@ WORD { // printf(" argument %s ", $1);
 
 			for (i = 0; i < pattern.gl_pathc; i++)// for loop to add each matching pattern to arguments in same simple command
 			{
-				commands[currcmd].numArgs++;
-				commands[currcmd].args[commands[currcmd].numArgs]=strdup(pattern.gl_pathv[i]);
+				commands[currentCom].numArgs++;
+				commands[currentCom].args[commands[currentCom].numArgs]=strdup(pattern.gl_pathv[i]);
 			}
 		}
 	}
 	else{
 		//cannot find any match pattern just add *?pattern as argument
-		commands[currcmd].numArgs++;
-		commands[currcmd].args[commands[currcmd].numArgs]=$1;
+		commands[currentCom].numArgs++;
+		commands[currentCom].args[commands[currentCom].numArgs]=$1;
 	}
 }
 ;
 
 command_word:
 WORD {//printf("command is \n", $1);
-	//every command star with cmd XXXXX here we inital command element
-	commands[currcmd].comName=$1;
-	commands[currcmd].args[0]=$1;
-	commands[currcmd].numArgs = 0;
+	//every command star with cmd XXXXX here we initial command element
+	commands[currentCom].comName=$1;
+	commands[currentCom].args[0]=$1;
+	commands[currentCom].numArgs = 0;
 
 }
 ;
@@ -163,3 +145,15 @@ AND {//printf(" enter & \n");
 | // can empty
 ;
 %%
+
+void
+yyerror(const char * s)
+{
+
+	fprintf(stderr, "Error at line %d: %s!\n",yylineno,s);
+}
+
+int yywrap()
+{
+	return 1;
+}
