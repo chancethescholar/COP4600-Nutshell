@@ -2,7 +2,6 @@
 #include "PARSER.tab.h"
 #include <string.h>
 #include<stdio.h>
-#include<string.h>
 #include "global.h"
 
 int argc = 0;

@@ -92,7 +92,7 @@ int runLS(void);
 int runLSDIR(char* directory);
 int runCAT(char* file);
 int runWC(char* file);
-int runMV(char* filepath, char* destination);
+int runMV(char* source, char* destination);
 
 Node* head = NULL;
 int aliasSize = 0;
@@ -1943,16 +1943,89 @@ int runWC(char* file)
 	return 1;
 }
 
-int runMV(char* filepath, char* destination)
+int runMV(char* source, char* destination)
 {
-	/*bool directory;
-	for(int i = 0; i < filepath.size(); i++)
+	bool src_isFile = false;
+	bool destn_isFile = false;
+	
+	DIR* src_directory = opendir(source);
+	DIR* destn_directory = opendir(destination);
+	
+	if(src_directory == NULL)
+		src_isFile = true;
+	
+	if(destn_directory == NULL)
+		destn_isFile = true;
+	
+	if(src_isFile == true && destn_isFile == true)
 	{
-		if(filepath(i) == '/')
-			directory = true;
-	}
-	if(directory == false)
-	{*/
-	return 1;
+		FILE *fp1;
+		FILE *fp2;
+		fp1 = fopen(source, "r");
+		fp2 = fopen(destination, "w");
+		char ch;
 		
+		while ((ch = fgetc(fp1)) != EOF) 
+		{
+			fputc(ch, fp2); 
+		}
+		fclose(fp1);
+		fclose(fp2);
+		remove(source);
+	}
+	else if(src_isFile == true && destn_isFile == false)
+	{
+		char* slash = "/";
+		
+		FILE *fp1;
+		FILE *fp2;
+
+		strcat(destination, slash);
+		strcat(destination, source);
+	
+		fp1 = fopen(source, "r");
+		fp2 = fopen(destination, "w");
+		char ch;
+		
+		while ((ch = fgetc(fp1)) != EOF) 
+		{
+			fputc(ch, fp2); 
+		}
+		fclose(fp1);
+		fclose(fp2);
+		remove(source);
+	}
+	/*else if(src_isFile == false && destn_isFile == false)
+	{
+		char *substr;
+		int index = 0;
+		int count = 0;
+		for(int i = 0; i < strlen(source); i++)
+		{
+			if(source[i] == '/')
+			{
+				index = i;
+				count = 0;
+			}
+			count++;
+		}
+		strnpy(substr, source[index + 1], count];
+		printf("%s", substr);
+		/*FILE *fp1;
+		FILE *fp2;
+		
+		fp1 = fopen(source, "r");
+		fp2 = fopen(destination, "w");
+		char ch;
+		
+		while ((ch = fgetc(fp1)) != EOF) 
+		{
+			fputc(ch, fp2); 
+		}
+		fclose(fp1);
+		fclose(fp2);
+		remove(source);
+		
+	}*/
+	return 1;	
 }
