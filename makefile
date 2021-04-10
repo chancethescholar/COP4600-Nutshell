@@ -1,19 +1,15 @@
-all: nutshell
-	
-nutshell: y.tab.o lex.yy.o global.h
-	cc lex.yy.o y.tab.o -o nutshell
+CC=/usr/bin/cc
 
-main.o: main.c global.h
-	cc main.c
+all:  bison-config flex-config main
 
-lex.yy.o: lex.yy.c
-	cc -c lex.yy.c
+bison-config:
+	bison -d PARSER.y
 
-y.tab.o: y.tab.c
-	cc -c y.tab.c
+flex-config:
+	flex LEXER.l
 
-lex.yy.c: shell.l
-	lex shell.l
+main:
+	$(CC) main.c PARSER.tab.c lex.yy.c -o main
 
-y.tab.c: shell.y main.c
-	yacc -d shell.y
+clean:
+	rm PARSER.tab.c PARSER.tab.h lex.yy.c main
