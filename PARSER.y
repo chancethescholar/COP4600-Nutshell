@@ -28,6 +28,7 @@ int runLSDIR(char* directory);
 int runCAT(char* file);
 int runWC(char* file);
 int runMV(char* source, char* destination);
+int runEcho(char* string);
 
 Node* head = NULL;
 int aliasSize = 0;
@@ -36,7 +37,7 @@ int aliasSize = 0;
 %union {char *string;}
 
 %start cmd_line
-%token <string> STRING SETENV PRINTENV UNSETENV CD ALIAS UNALIAS BYE END LS PWD WC SORT PAGE CAT CP MV PING PIPE
+%token <string> STRING SETENV PRINTENV UNSETENV CD ALIAS UNALIAS BYE END LS PWD WC SORT PAGE CAT CP MV PING PIPE ECHO
 
 %%
 cmd_line    :
@@ -59,7 +60,7 @@ cmd_line    :
 	| MV STRING STRING END 		{runMV($2,$3); return 1;}
 	| PING END 					{return 1;}
 	| PIPE STRING END		{return 1;}
-	//| ECHO END 				{return 1;}
+	| ECHO STRING END 				{runEcho($2); return 1;}
 
 %%
 
@@ -464,4 +465,9 @@ int runMV(char* source, char* destination)
 
 	}*/
 	return 1;
+}
+
+int runEcho(char* string)
+{
+	printf("%s\n", string);
 }

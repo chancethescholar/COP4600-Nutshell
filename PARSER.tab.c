@@ -84,7 +84,8 @@
      CP = 273,
      MV = 274,
      PING = 275,
-     PIPE = 276
+     PIPE = 276,
+     ECHO = 277
    };
 #endif
 /* Tokens.  */
@@ -107,6 +108,7 @@
 #define MV 274
 #define PING 275
 #define PIPE 276
+#define ECHO 277
 
 
 
@@ -143,6 +145,7 @@ int runLSDIR(char* directory);
 int runCAT(char* file);
 int runWC(char* file);
 int runMV(char* source, char* destination);
+int runEcho(char* string);
 
 Node* head = NULL;
 int aliasSize = 0;
@@ -168,10 +171,10 @@ int aliasSize = 0;
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 36 "PARSER.y"
+#line 37 "PARSER.y"
 {char *string;}
 /* Line 193 of yacc.c.  */
-#line 175 "PARSER.tab.c"
+#line 178 "PARSER.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -184,7 +187,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 188 "PARSER.tab.c"
+#line 191 "PARSER.tab.c"
 
 #ifdef short
 # undef short
@@ -397,22 +400,22 @@ union yyalloc
 #endif
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  38
+#define YYFINAL  40
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   52
+#define YYLAST   56
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  22
+#define YYNTOKENS  23
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  2
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  20
+#define YYNRULES  21
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  52
+#define YYNSTATES  55
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   276
+#define YYMAXUTOK   277
 
 #define YYTRANSLATE(YYX)						\
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -447,7 +450,7 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16,    17,    18,    19,    20,    21
+      15,    16,    17,    18,    19,    20,    21,    22
 };
 
 #if YYDEBUG
@@ -457,28 +460,28 @@ static const yytype_uint8 yyprhs[] =
 {
        0,     0,     3,     6,    11,    14,    18,    22,    27,    30,
       34,    37,    41,    44,    48,    51,    54,    58,    61,    66,
-      69
+      69,    73
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
-      23,     0,    -1,    10,    11,    -1,     4,     3,     3,    11,
+      24,     0,    -1,    10,    11,    -1,     4,     3,     3,    11,
       -1,     5,    11,    -1,     6,     3,    11,    -1,     7,     3,
       11,    -1,     8,     3,     3,    11,    -1,     8,    11,    -1,
        9,     3,    11,    -1,    12,    11,    -1,    12,     3,    11,
       -1,    13,    11,    -1,    14,     3,    11,    -1,    15,    11,
       -1,    16,    11,    -1,    17,     3,    11,    -1,    18,    11,
       -1,    19,     3,     3,    11,    -1,    20,    11,    -1,    21,
-       3,    11,    -1
+       3,    11,    -1,    22,     3,    11,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    43,    43,    44,    45,    46,    47,    48,    49,    50,
-      51,    52,    53,    54,    55,    56,    57,    58,    59,    60,
-      61
+       0,    44,    44,    45,    46,    47,    48,    49,    50,    51,
+      52,    53,    54,    55,    56,    57,    58,    59,    60,    61,
+      62,    63
 };
 #endif
 
@@ -489,7 +492,8 @@ static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "STRING", "SETENV", "PRINTENV",
   "UNSETENV", "CD", "ALIAS", "UNALIAS", "BYE", "END", "LS", "PWD", "WC",
-  "SORT", "PAGE", "CAT", "CP", "MV", "PING", "PIPE", "$accept", "cmd_line", 0
+  "SORT", "PAGE", "CAT", "CP", "MV", "PING", "PIPE", "ECHO", "$accept",
+  "cmd_line", 0
 };
 #endif
 
@@ -500,16 +504,16 @@ static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
-     275,   276
+     275,   276,   277
 };
 # endif
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    22,    23,    23,    23,    23,    23,    23,    23,    23,
-      23,    23,    23,    23,    23,    23,    23,    23,    23,    23,
-      23
+       0,    23,    24,    24,    24,    24,    24,    24,    24,    24,
+      24,    24,    24,    24,    24,    24,    24,    24,    24,    24,
+      24,    24
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
@@ -517,7 +521,7 @@ static const yytype_uint8 yyr2[] =
 {
        0,     2,     2,     4,     2,     3,     3,     4,     2,     3,
        2,     3,     2,     3,     2,     2,     3,     2,     4,     2,
-       3
+       3,     3
 };
 
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
@@ -527,16 +531,16 @@ static const yytype_uint8 yydefact[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       4,     0,     0,     0,     8,     0,     2,     0,    10,    12,
-       0,    14,    15,     0,    17,     0,    19,     0,     1,     0,
-       5,     6,     0,     9,    11,    13,    16,     0,    20,     3,
-       7,    18
+       0,     4,     0,     0,     0,     8,     0,     2,     0,    10,
+      12,     0,    14,    15,     0,    17,     0,    19,     0,     0,
+       1,     0,     5,     6,     0,     9,    11,    13,    16,     0,
+      20,    21,     3,     7,    18
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,    18
+      -1,    19
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
@@ -544,12 +548,12 @@ static const yytype_int8 yydefgoto[] =
 #define YYPACT_NINF -5
 static const yytype_int8 yypact[] =
 {
-      -4,     4,     9,    18,    19,    15,    20,    13,    16,    14,
-      25,    21,    22,    26,    23,    27,    24,    28,    36,    34,
-      -5,    29,    30,    35,    -5,    31,    -5,    32,    -5,    -5,
-      33,    -5,    -5,    37,    -5,    42,    -5,    38,    -5,    39,
-      -5,    -5,    40,    -5,    -5,    -5,    -5,    41,    -5,    -5,
-      -5,    -5
+      -4,     4,    10,    19,    20,    16,    21,    14,    17,    15,
+      26,    22,    23,    27,    24,    28,    25,    29,    34,    38,
+      36,    -5,    30,    31,    37,    -5,    32,    -5,    33,    -5,
+      -5,    35,    -5,    -5,    39,    -5,    42,    -5,    40,    41,
+      -5,    43,    -5,    -5,    44,    -5,    -5,    -5,    -5,    45,
+      -5,    -5,    -5,    -5,    -5
 };
 
 /* YYPGOTO[NTERM-NUM].  */
@@ -565,22 +569,22 @@ static const yytype_int8 yypgoto[] =
 #define YYTABLE_NINF -1
 static const yytype_uint8 yytable[] =
 {
-       1,     2,     3,     4,     5,     6,     7,    19,     8,     9,
-      10,    11,    12,    13,    14,    15,    16,    17,    23,    27,
-      20,    21,    22,    25,    26,    29,    24,    28,    30,    33,
-      35,    37,    31,    32,    34,    36,    38,    39,    42,     0,
-      40,    41,    43,    44,    45,    47,     0,     0,    46,    48,
-      49,    50,    51
+       1,     2,     3,     4,     5,     6,     7,    20,     8,     9,
+      10,    11,    12,    13,    14,    15,    16,    17,    18,    24,
+      28,    21,    22,    23,    26,    27,    30,    25,    29,    31,
+      34,    36,    38,    32,    33,    35,    37,    39,    40,    41,
+      44,    42,    43,    45,    46,    49,    47,     0,     0,     0,
+      48,    50,    51,     0,    52,    53,    54
 };
 
 static const yytype_int8 yycheck[] =
 {
        4,     5,     6,     7,     8,     9,    10,     3,    12,    13,
-      14,    15,    16,    17,    18,    19,    20,    21,     3,     3,
-      11,     3,     3,     3,    11,    11,    11,    11,     3,     3,
-       3,     3,    11,    11,    11,    11,     0,     3,     3,    -1,
-      11,    11,    11,    11,    11,     3,    -1,    -1,    11,    11,
-      11,    11,    11
+      14,    15,    16,    17,    18,    19,    20,    21,    22,     3,
+       3,    11,     3,     3,     3,    11,    11,    11,    11,     3,
+       3,     3,     3,    11,    11,    11,    11,     3,     0,     3,
+       3,    11,    11,    11,    11,     3,    11,    -1,    -1,    -1,
+      11,    11,    11,    -1,    11,    11,    11
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
@@ -588,11 +592,11 @@ static const yytype_int8 yycheck[] =
 static const yytype_uint8 yystos[] =
 {
        0,     4,     5,     6,     7,     8,     9,    10,    12,    13,
-      14,    15,    16,    17,    18,    19,    20,    21,    23,     3,
-      11,     3,     3,     3,    11,     3,    11,     3,    11,    11,
-       3,    11,    11,     3,    11,     3,    11,     3,     0,     3,
-      11,    11,     3,    11,    11,    11,    11,     3,    11,    11,
-      11,    11
+      14,    15,    16,    17,    18,    19,    20,    21,    22,    24,
+       3,    11,     3,     3,     3,    11,     3,    11,     3,    11,
+      11,     3,    11,    11,     3,    11,     3,    11,     3,     3,
+       0,     3,    11,    11,     3,    11,    11,    11,    11,     3,
+      11,    11,    11,    11,    11
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1407,103 +1411,108 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 43 "PARSER.y"
+#line 44 "PARSER.y"
     {exit(1); return 1; ;}
     break;
 
   case 3:
-#line 44 "PARSER.y"
+#line 45 "PARSER.y"
     {runSetEnv((yyvsp[(2) - (4)].string), (yyvsp[(3) - (4)].string)); return 1;;}
     break;
 
   case 4:
-#line 45 "PARSER.y"
+#line 46 "PARSER.y"
     {runPrintEnv(); return 1;;}
     break;
 
   case 5:
-#line 46 "PARSER.y"
+#line 47 "PARSER.y"
     {runUnsetEnv((yyvsp[(2) - (3)].string)); return 1;;}
     break;
 
   case 6:
-#line 47 "PARSER.y"
+#line 48 "PARSER.y"
     {runCD((yyvsp[(2) - (3)].string)); return 1;;}
     break;
 
   case 7:
-#line 48 "PARSER.y"
+#line 49 "PARSER.y"
     {runSetAlias((yyvsp[(2) - (4)].string), (yyvsp[(3) - (4)].string)); return 1;;}
     break;
 
   case 8:
-#line 49 "PARSER.y"
+#line 50 "PARSER.y"
     {runListAlias(); return 1;;}
     break;
 
   case 9:
-#line 50 "PARSER.y"
+#line 51 "PARSER.y"
     {runRemoveAlias((yyvsp[(2) - (3)].string)); return 1;;}
     break;
 
   case 10:
-#line 51 "PARSER.y"
+#line 52 "PARSER.y"
     {runLS(); return 1;;}
     break;
 
   case 11:
-#line 52 "PARSER.y"
+#line 53 "PARSER.y"
     {runLSDIR((yyvsp[(2) - (3)].string)); return 1;;}
     break;
 
   case 12:
-#line 53 "PARSER.y"
+#line 54 "PARSER.y"
     {printf("%s\n", varTable.word[0]); return 1;;}
     break;
 
   case 13:
-#line 54 "PARSER.y"
+#line 55 "PARSER.y"
     {runWC((yyvsp[(2) - (3)].string)); return 1;;}
     break;
 
   case 14:
-#line 55 "PARSER.y"
-    {return 1;;}
-    break;
-
-  case 15:
 #line 56 "PARSER.y"
     {return 1;;}
     break;
 
-  case 16:
+  case 15:
 #line 57 "PARSER.y"
+    {return 1;;}
+    break;
+
+  case 16:
+#line 58 "PARSER.y"
     {runCAT((yyvsp[(2) - (3)].string)); return 1;;}
     break;
 
   case 17:
-#line 58 "PARSER.y"
+#line 59 "PARSER.y"
     {return 1;;}
     break;
 
   case 18:
-#line 59 "PARSER.y"
+#line 60 "PARSER.y"
     {runMV((yyvsp[(2) - (4)].string),(yyvsp[(3) - (4)].string)); return 1;;}
     break;
 
   case 19:
-#line 60 "PARSER.y"
-    {return 1;;}
-    break;
-
-  case 20:
 #line 61 "PARSER.y"
     {return 1;;}
     break;
 
+  case 20:
+#line 62 "PARSER.y"
+    {return 1;;}
+    break;
+
+  case 21:
+#line 63 "PARSER.y"
+    {runEcho((yyvsp[(2) - (3)].string)); return 1;;}
+    break;
+
 
 /* Line 1267 of yacc.c.  */
-#line 1507 "PARSER.tab.c"
+#line 1516 "PARSER.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1717,7 +1726,7 @@ yyreturn:
 }
 
 
-#line 64 "PARSER.y"
+#line 65 "PARSER.y"
 
 
 int yyerror(char *s)
@@ -2121,5 +2130,10 @@ int runMV(char* source, char* destination)
 
 	}*/
 	return 1;
+}
+
+int runEcho(char* string)
+{
+	printf("%s\n", string);
 }
 
