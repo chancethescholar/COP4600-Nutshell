@@ -4,7 +4,17 @@
 #include<stdio.h>
 #include "global.h"
 
-int argc = 0;
+int yyparse();
+
+int argc = 0; //keeps track of number of words in input
+
+char* infile_name=NULL;  //in file description
+char* out_file_name=NULL;	//out file description
+char* err_file_name=NULL; //error file  description
+int open_permission =0; //open option
+int background = 0; //check & background or not
+int currcmd= 0; // current cmd index
+
 
 char* subAliases(char* name)
 {
@@ -30,7 +40,8 @@ bool ifAlias(char* name)
   Node* current = head;
   for(int i = 0; i < aliasSize; i++)
   {
-    if(strcmp(current -> name, name) == 0) {
+    if(strcmp(current -> name, name) == 0)
+    {
         return true;
     }
     current = current -> next;
@@ -52,32 +63,69 @@ ANYCHAR            [)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][)(*&%$#@!`;,\.a-zA-Z0-9'/*_
 <string_condition>{ANYCHAR}+     { yylval.string = strdup(yytext); return STRING;}
 <string_condition>[\"]          {BEGIN(INITIAL);}
 
-[ ]		            { }
-setenv				{ return SETENV; }
-printenv			{ return PRINTENV; }
-unsetenv			{ return UNSETENV; }
-cd		            { return CD; }
-alias		        { return ALIAS; }
-unalias				{ return UNALIAS; }
-bye                 { return BYE; }
+setenv				{ argc++; return SETENV; }
+printenv			{ argc++; return PRINTENV; }
+unsetenv			{ argc++; return UNSETENV; }
+cd		            { argc++; return CD; }
+alias		        { argc++; return ALIAS; }
+unalias				{ argc++; return UNALIAS; }
+bye                 { argc++; return BYE; }
 "\n"		        { return END; }
 [\"]                { BEGIN(string_condition); }
-ls					{ return LS; }
-pwd					{ return PWD; }
-wc					{ return WC; }
-sort				{ return SORT; }
-page				{ return PAGE; }
-cat					{ return CAT; }
-cp					{ return CP; }
-mv					{ return MV; }
-ping				{ return PING; }
-" "         { argc++; }
-[\t\n]      { argc++; }
+ls					{ argc++; return LS; }
+pwd					{ argc++; return PWD; }
+wc					{ argc++; return WC; }
+sort				{ argc++; return SORT; }
+page				{ argc++; return PAGE; }
+cat					{ argc++; return CAT; }
+cp					{ argc++; return CP; }
+mv					{ argc++; return MV; }
+ping				{ argc++; return PING; }
 {CHAR}+     {
-                printf("yytext: %s\n", yytext);
+              argc++;
+              //printf("%d\n", argc);
+              if(argc == 1) //if only one word inputted, check if word has alias
+              {
+                if(ifAlias(yytext) && strcmp(subAliases(yytext), "ls") == 0)
+                {
+                  return LS;
+                }
+
+                else if(ifAlias(yytext) && strcmp(subAliases(yytext), "cd") == 0)
+                {
+                  return CD;
+                }
+
+                else if(ifAlias(yytext) && strcmp(subAliases(yytext), "setenv") == 0)
+                {
+                  return SETENV;
+                }
+
+                else if(ifAlias(yytext) && strcmp(subAliases(yytext), "printenv") == 0)
+                {
+                  return PRINTENV;
+                }
+
+                else if(ifAlias(yytext) && strcmp(subAliases(yytext), "alias") == 0)
+                {
+                  return ALIAS;
+                }
+
+                else if(ifAlias(yytext) && strcmp(subAliases(yytext), "bye") == 0)
+                {
+                  return BYE;
+                }
+
+                else if(ifAlias(yytext) && strcmp(subAliases(yytext), "pwd") == 0)
+                {
+                  return PWD;
+                }
+              }
+
+              else
+              {
                 yylval.string = strdup(yytext);
                 return STRING;
-              //printf("%d\n", argc);
+              };
             }
-
 %%

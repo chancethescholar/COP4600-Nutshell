@@ -31,5 +31,4 @@ typedef struct Node
 
 Node* head;
 int aliasSize; //size of alias list
-
-
+int argc;

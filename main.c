@@ -32,8 +32,8 @@ int main()
     {
         printf("[%s]>> ", varTable.word[2]);
         yyparse();
+        argc = 0;
     }
-	
+
    return 0;
 }
-

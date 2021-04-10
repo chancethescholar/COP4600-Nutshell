@@ -42,7 +42,7 @@ int aliasSize = 0;
 cmd_line    :
 	BYE END						{exit(1); return 1; }
 	| SETENV STRING STRING END	{runSetEnv($2, $3); return 1;}
-	| PRINTENV					{runPrintEnv(); return 1;}
+	| PRINTENV END					{runPrintEnv(); return 1;}
 	| UNSETENV STRING END		{runUnsetEnv($2); return 1;}
 	| CD STRING END				{runCD($2); return 1;}
 	| ALIAS STRING STRING END	{runSetAlias($2, $3); return 1;}
@@ -153,27 +153,6 @@ int runCD(char* arg)
 
 int runSetAlias(char *name, char *word) {
 	if(strcmp(name, word) == 0)
-    {
-        printf("Error, expansion of \"%s\" would create a loop.\n", name);
-        return 1;
-    }
-
-    for (int i = 0; i < aliasIndex; i++)
-    {
-        if((strcmp(aliasTable.name[i], name) == 0) && (strcmp(aliasTable.word[i], word) == 0)){
-            printf("Error, expansion of \"%s\" would create a loop.\n", name);
-            return 1;
-        }
-        else if(strcmp(aliasTable.name[i], name) == 0) {
-            strcpy(aliasTable.word[i], word);
-            return 1;
-        }
-    }
-    strcpy(aliasTable.name[aliasIndex], name);
-    strcpy(aliasTable.word[aliasIndex], word);
-    aliasIndex++;
-	
-	if(strcmp(name, word) == 0)
 	{
 		printf("Error, expansion of \"%s\" would create a loop.\n", name);
 		return 1;
@@ -187,6 +166,7 @@ int runSetAlias(char *name, char *word) {
 		root -> word = word;
 		root -> next = NULL;
 		head = root;
+		//map.insert<name, word>;
 	}
 
 	else //else if there exists an alias already
@@ -256,13 +236,13 @@ int runListAlias(void) {
 
 int runRemoveAlias(char *name)
 {
-	//printf("%s\n", name);
 	if(aliasSize == 0) //if no aliases exist
 	{
 		printf("Error: No alias %s found\n", name);
 	}
 
 	Node* current = head;
+
 	if(strcmp(current -> name, name) == 0) //if alias with name found
 	{
 		if(current -> next != NULL)
@@ -281,7 +261,7 @@ int runRemoveAlias(char *name)
 
 	else if(current -> next == NULL)
 	{
-		printf("Error: Alias %s not found\n", name);
+		fprintf(stderr, "Error: Alias %s not found\n", name);
 	}
 
 	else
@@ -301,6 +281,7 @@ int runRemoveAlias(char *name)
 		fprintf(stderr, "Error: Alias %s not found\n", name);
 	}
 	return 1;
+
 }
 
 int runLS(void)
@@ -347,7 +328,7 @@ int runCAT(char* file)
 	char line[256];
 
     while (fgets(line, sizeof(line), fp)) {
-        printf("%s", line); 
+        printf("%s", line);
     }
     fclose(fp);
     return 1;
@@ -362,20 +343,20 @@ int runWC(char* file)
 
 	FILE *fp;
 	fp = fopen(file, "r");
-	
-	if(fp == NULL) 
+
+	if(fp == NULL)
 	{
 		printf("Could not open the file %s\n", file);
 		return 1;
 	}
 
-	while ((ch = fgetc(fp)) != EOF) 
+	while ((ch = fgetc(fp)) != EOF)
 	{
 		char_count++;
 
-		if(ch == ' ' || ch == '\t' || ch == '\0' || ch == '\n') 
+		if(ch == ' ' || ch == '\t' || ch == '\0' || ch == '\n')
 		{
-			if (in_word) 
+			if (in_word)
 			{
 				in_word = 0;
 				word_count++;
@@ -383,8 +364,8 @@ int runWC(char* file)
 
 			if(ch = '\0' || ch == '\n') line_count++;
 
-		} 
-		else 
+		}
+		else
 		{
 			in_word = 1;
 		}
@@ -393,7 +374,7 @@ int runWC(char* file)
 	fp = fopen(file, "r");
 	for(bytes = 0; getc(fp) != EOF; ++bytes);
 	printf("%d %d %d %s\n",line_count,word_count,bytes,file);
-	
+
 	return 1;
 }
 
@@ -401,16 +382,16 @@ int runMV(char* source, char* destination)
 {
 	bool src_isFile = false;
 	bool destn_isFile = false;
-	
+
 	DIR* src_directory = opendir(source);
 	DIR* destn_directory = opendir(destination);
-	
+
 	if(src_directory == NULL)
 		src_isFile = true;
-	
+
 	if(destn_directory == NULL)
 		destn_isFile = true;
-	
+
 	if(src_isFile == true && destn_isFile == true)
 	{
 		FILE *fp1;
@@ -418,10 +399,10 @@ int runMV(char* source, char* destination)
 		fp1 = fopen(source, "r");
 		fp2 = fopen(destination, "w");
 		char ch;
-		
-		while ((ch = fgetc(fp1)) != EOF) 
+
+		while ((ch = fgetc(fp1)) != EOF)
 		{
-			fputc(ch, fp2); 
+			fputc(ch, fp2);
 		}
 		fclose(fp1);
 		fclose(fp2);
@@ -430,20 +411,20 @@ int runMV(char* source, char* destination)
 	else if(src_isFile == true && destn_isFile == false)
 	{
 		char* slash = "/";
-		
+
 		FILE *fp1;
 		FILE *fp2;
 
 		strcat(destination, slash);
 		strcat(destination, source);
-	
+
 		fp1 = fopen(source, "r");
 		fp2 = fopen(destination, "w");
 		char ch;
-		
-		while ((ch = fgetc(fp1)) != EOF) 
+
+		while ((ch = fgetc(fp1)) != EOF)
 		{
-			fputc(ch, fp2); 
+			fputc(ch, fp2);
 		}
 		fclose(fp1);
 		fclose(fp2);
@@ -467,19 +448,19 @@ int runMV(char* source, char* destination)
 		printf("%s", substr);
 		/*FILE *fp1;
 		FILE *fp2;
-		
+
 		fp1 = fopen(source, "r");
 		fp2 = fopen(destination, "w");
 		char ch;
-		
-		while ((ch = fgetc(fp1)) != EOF) 
+
+		while ((ch = fgetc(fp1)) != EOF)
 		{
-			fputc(ch, fp2); 
+			fputc(ch, fp2);
 		}
 		fclose(fp1);
 		fclose(fp2);
 		remove(source);
-		
+
 	}*/
-	return 1;	
+	return 1;
 }
