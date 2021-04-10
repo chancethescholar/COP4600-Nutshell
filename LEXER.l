@@ -8,14 +8,6 @@ int yyparse();
 
 int argc = 0; //keeps track of number of words in input
 
-char* infile_name=NULL;  //in file description
-char* out_file_name=NULL;	//out file description
-char* err_file_name=NULL; //error file  description
-int open_permission =0; //open option
-int background = 0; //check & background or not
-int currcmd= 0; // current cmd index
-
-
 char* subAliases(char* name)
 {
   if(aliasSize == 0)
@@ -63,6 +55,7 @@ ANYCHAR            [)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][)(*&%$#@!`;,\.a-zA-Z0-9'/*_
 <string_condition>{ANYCHAR}+     { yylval.string = strdup(yytext); return STRING;}
 <string_condition>[\"]          {BEGIN(INITIAL);}
 
+[ ]           { }
 setenv				{ argc++; return SETENV; }
 printenv			{ argc++; return PRINTENV; }
 unsetenv			{ argc++; return UNSETENV; }
@@ -81,6 +74,7 @@ cat					{ argc++; return CAT; }
 cp					{ argc++; return CP; }
 mv					{ argc++; return MV; }
 ping				{ argc++; return PING; }
+"|"		      { return PIPE; }
 {CHAR}+     {
               argc++;
               //printf("%d\n", argc);
