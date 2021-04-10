@@ -1802,13 +1802,13 @@ int runListAlias(void) {
 
 int runRemoveAlias(char *name)
 {
+	//printf("%s\n", name);
 	if(aliasSize == 0) //if no aliases exist
 	{
 		printf("Error: No alias %s found\n", name);
 	}
 
 	Node* current = head;
-
 	if(strcmp(current -> name, name) == 0) //if alias with name found
 	{
 		if(current -> next != NULL)
@@ -1827,7 +1827,7 @@ int runRemoveAlias(char *name)
 
 	else if(current -> next == NULL)
 	{
-		fprintf(stderr, "Error: Alias %s not found\n", name);
+		printf("Error: Alias %s not found\n", name);
 	}
 
 	else
@@ -1956,4 +1956,3 @@ int runMV(char* filepath, char* destination)
 	return 1;
 		
 }
-

@@ -5,8 +5,10 @@
 #include<string.h>
 #include "global.h"
 
-char* subAliases(char* name){
-  int currentCom = 0;
+int argc = 0;
+
+char* subAliases(char* name)
+{
   if(aliasSize == 0)
     return name;
 
@@ -22,22 +24,21 @@ char* subAliases(char* name){
   }
 
   return name;
-
-  for (int i = 0; i < aliasIndex; i++) {
-        if(strcmp(aliasTable.name[i], name) == 0) {
-            return aliasTable.word[i];
-        }
-    }
-    return name;
 }
-bool ifAlias(char* name){
-for (int i = 0; i < aliasIndex; i++) {
-      if(strcmp(aliasTable.name[i], name) == 0) {
-          return true;
-      }
+
+bool ifAlias(char* name)
+{
+  Node* current = head;
+  for(int i = 0; i < aliasSize; i++)
+  {
+    if(strcmp(current -> name, name) == 0) {
+        return true;
+    }
+    current = current -> next;
   }
   return false;
 }
+
 %}
 
 %array
@@ -71,22 +72,13 @@ cat					{ return CAT; }
 cp					{ return CP; }
 mv					{ return MV; }
 ping				{ return PING; }
-{CHAR}+             {
-						if(ifAlias(yytext))
-						{
-							printf("yytext: %s\n", yytext);
-							char *yycopy = strdup( subAliases(yytext) );
-							for ( int i = strlen(subAliases(yytext)) - 1; i >= 0; --i )
-								unput( yycopy[i] );
-							free( yycopy );
+" "         { argc++; }
+[\t\n]      { argc++; }
+{CHAR}+     {
+                printf("yytext: %s\n", yytext);
+                yylval.string = strdup(yytext);
+                return STRING;
+              //printf("%d\n", argc);
+            }
 
-						}
-						else
-						{
-							printf("yytext: %s\n", yytext);
-							yylval.string = strdup(yytext);
-							return STRING;
-						};
-                     }
 %%
-
