@@ -36,7 +36,7 @@ int aliasSize = 0;
 %union {char *string;}
 
 %start cmd_line
-%token <string> STRING SETENV PRINTENV UNSETENV CD ALIAS UNALIAS BYE END LS PWD WC SORT PAGE CAT CP MV PING
+%token <string> STRING SETENV PRINTENV UNSETENV CD ALIAS UNALIAS BYE END LS PWD WC SORT PAGE CAT CP MV PING PIPE
 
 %%
 cmd_line    :
@@ -58,6 +58,7 @@ cmd_line    :
 	| CP END 					{return 1;}
 	| MV STRING STRING END 		{runMV($2,$3); return 1;}
 	| PING END 					{return 1;}
+	| PIPE STRING END		{return 1;}
 	//| ECHO END 				{return 1;}
 
 %%

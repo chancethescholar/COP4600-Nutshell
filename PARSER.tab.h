@@ -56,7 +56,8 @@
      CAT = 272,
      CP = 273,
      MV = 274,
-     PING = 275
+     PING = 275,
+     PIPE = 276
    };
 #endif
 /* Tokens.  */
@@ -78,6 +79,7 @@
 #define CP 273
 #define MV 274
 #define PING 275
+#define PIPE 276
 
 
 
@@ -87,7 +89,7 @@ typedef union YYSTYPE
 #line 36 "PARSER.y"
 {char *string;}
 /* Line 1529 of yacc.c.  */
-#line 91 "PARSER.tab.h"
+#line 93 "PARSER.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
