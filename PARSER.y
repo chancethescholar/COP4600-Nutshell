@@ -32,6 +32,8 @@ int runEcho(char* string);
 int runPing(char* address);
 int runPipe(char* firstCom, char* firstArg, char* secondCom, char* secondArg);
 int getDateTime();
+int runSSH(char* address);
+int runRemove(char* arg);
 
 Node* head = NULL;
 int aliasSize = 0;
@@ -41,7 +43,7 @@ int aliasSize = 0;
 
 %start cmd_line
 %token <string> STRING SETENV PRINTENV UNSETENV CD ALIAS UNALIAS BYE END LS PWD
-%token WC SORT PAGE CAT CP MV PING PIPE ECHO DATE
+%token WC SORT PAGE CAT CP MV PING PIPE ECHO DATE SSH RM
 
 %%
 cmd_line    :
@@ -66,6 +68,8 @@ cmd_line    :
 	| STRING STRING PIPE STRING STRING END 					{runPipe($1, $2, $4, $5); return 1;}
 	//| ECHO STRING END 				{runEcho($2); return 1;}
 	| DATE END										{getDateTime(); return 1;}
+	| SSH STRING END							{runSSH($2); return 1;}
+	| RM STRING END								{runRemove($2); return 1;}
 
 %%
 
@@ -331,6 +335,7 @@ int runLSDIR(char* directory)
 	if(pid == 0)
 	{
 		execl("/bin/ls", "ls", directory, NULL);
+		perror("ls error");
 		exit(1);
 	}
 
@@ -341,7 +346,6 @@ int runLSDIR(char* directory)
 			close(fd[1]);
 			waitpid(pid, &status, 0);
 	}
-
 }
 
 int runCAT(char* file)
@@ -535,8 +539,57 @@ int runEcho(char* string)
 
 int getDateTime()
 {
-time_t T= time(NULL);
+	time_t T= time(NULL);
 	struct  tm tm = *localtime(&T);
 	printf("%02d/%02d/%04d %02d:%02d:%02d\n",tm.tm_mday, tm.tm_mon+1, tm.tm_year+1900,tm.tm_hour, tm.tm_min, tm.tm_sec);
 	return 1;
+}
+
+int runSSH(char* address)
+{
+	pid_t pid;
+	int fd[1];
+
+	pipe(fd);
+	pid = fork();
+
+	if(pid == 0)
+	{
+		execl("ssh", "ssh", address, NULL);
+		printf("ssh: connect to host %s\n", address);
+		perror("Connection refused");
+		exit(1);
+	}
+
+	else
+	{
+			int status;
+			close(fd[0]);
+			close(fd[1]);
+			waitpid(pid, &status, 0);
+	}
+}
+
+int runRemove(char* arg)
+{
+	pid_t pid;
+	int fd[1];
+
+	pipe(fd);
+	pid = fork();
+
+	if(pid == 0)
+	{
+		execl("/bin/rm", "/bin/rm", arg, NULL);
+		perror("rm error");
+		exit(1);
+	}
+
+	else
+	{
+			int status;
+			close(fd[0]);
+			close(fd[1]);
+			waitpid(pid, &status, 0);
+	}
 }

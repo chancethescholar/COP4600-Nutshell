@@ -76,6 +76,8 @@ mv					{ argc++; return MV; }
 ping				{ argc++; return PING; }
 echo        { argc++; return ECHO; }
 date        { argc++; return DATE; }
+ssh         { argc++; return SSH; }
+rm          { argc++; return RM; }
 "|"		      { return PIPE; }
 {CHAR}+     {
               argc++;

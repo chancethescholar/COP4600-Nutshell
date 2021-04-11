@@ -59,7 +59,9 @@
      PING = 275,
      PIPE = 276,
      ECHO = 277,
-     DATE = 278
+     DATE = 278,
+     SSH = 279,
+     RM = 280
    };
 #endif
 /* Tokens.  */
@@ -84,16 +86,18 @@
 #define PIPE 276
 #define ECHO 277
 #define DATE 278
+#define SSH 279
+#define RM 280
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 40 "PARSER.y"
+#line 42 "PARSER.y"
 {char *string;}
 /* Line 1529 of yacc.c.  */
-#line 97 "PARSER.tab.h"
+#line 101 "PARSER.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
