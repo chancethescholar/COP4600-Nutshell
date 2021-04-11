@@ -12,7 +12,7 @@
 #include "global.h"
 
 int chdir();
-int getcwd();
+char* getcwd();
 
 int yylex(void);
 int yyerror(char *s);
@@ -29,6 +29,9 @@ int runCAT(char* file);
 int runWC(char* file);
 int runMV(char* source, char* destination);
 int runEcho(char* string);
+int runPing(char* address);
+int runPipe(char* firstCom, char* firstArg, char* secondCom, char* secondArg);
+int getDateTime();
 
 Node* head = NULL;
 int aliasSize = 0;
@@ -37,7 +40,8 @@ int aliasSize = 0;
 %union {char *string;}
 
 %start cmd_line
-%token <string> STRING SETENV PRINTENV UNSETENV CD ALIAS UNALIAS BYE END LS PWD WC SORT PAGE CAT CP MV PING PIPE ECHO
+%token <string> STRING SETENV PRINTENV UNSETENV CD ALIAS UNALIAS BYE END LS PWD
+%token WC SORT PAGE CAT CP MV PING PIPE ECHO DATE
 
 %%
 cmd_line    :
@@ -58,9 +62,10 @@ cmd_line    :
 	| CAT STRING END 			{runCAT($2); return 1;}
 	| CP END 					{return 1;}
 	| MV STRING STRING END 		{runMV($2,$3); return 1;}
-	| PING END 					{return 1;}
-	| PIPE STRING END		{return 1;}
+	| PING END							{printf("ping: usage error: Destination address required\n"); return 1;}
+	| STRING STRING PIPE STRING STRING END 					{runPipe($1, $2, $4, $5); return 1;}
 	| ECHO STRING END 				{runEcho($2); return 1;}
+	| DATE END										{getDateTime(); return 1;}
 
 %%
 
@@ -160,6 +165,17 @@ int runSetAlias(char *name, char *word) {
 		return 1;
 	}
 
+	Node* current = head;
+	for(int i = 0; i < aliasSize; i++)
+	{
+		if((strcmp(current -> name, word) == 0 && strcmp(current -> word, name) == 0) || strcmp(current -> name, name) == 0)
+		{
+			printf("Error, expansion of \"%s\" would create a loop.\n", name);
+			return 1;
+		}
+		current = current -> next;
+	}
+
 	if(aliasSize == 0) //if there are no aliases in the list
 	{
 		//create list with root pointing at beginning of list
@@ -229,7 +245,7 @@ int runListAlias(void) {
 	{
 		//for(auto const& it: aliases)
 		//{
-		printf("%s %s\n", current -> name, current -> word);
+		printf("%s=%s\n", current -> name, current -> word);
 		//}
 		current = current -> next;
 	}
@@ -306,21 +322,26 @@ int runLS(void)
 
 int runLSDIR(char* directory)
 {
-	DIR* dir;
-	dir = opendir(directory);
-	struct dirent* dp;
-	if(dir)
+	pid_t pid;
+	int fd[1];
+
+	pipe(fd);
+	pid = fork();
+
+	if(pid == 0)
 	{
-		while((dp = readdir(dir)) != NULL)
-		{
-			printf("%s\n", dp -> d_name);
-		}
-		closedir(dir);
+		execl("/bin/ls", "ls", directory, NULL);
+		exit(1);
 	}
 
 	else
-		printf("not valid");
-	return 1;
+	{
+			int status;
+			close(fd[0]);
+			close(fd[1]);
+			waitpid(pid, &status, 0);
+	}
+
 }
 
 int runCAT(char* file)
@@ -467,7 +488,55 @@ int runMV(char* source, char* destination)
 	return 1;
 }
 
+int runPipe(char* firstCom, char* firstArg, char* secondCom, char* secondArg)
+{
+	pid_t pid;
+	int fd[2];
+
+	pipe(fd);
+	pid = fork();
+
+	if(pid == 0)
+	{
+		dup2(fd[1], STDOUT_FILENO);
+		close(fd[0]);
+		close(fd[1]);
+		execlp(firstCom, firstCom, firstArg, (char*) NULL);
+		fprintf(stderr, "Failed to execute %s\n", firstCom);
+		exit(1);
+	}
+	else
+	{
+		pid = fork();
+
+		if(pid == 0)
+		{
+				dup2(fd[0], STDIN_FILENO);
+				close(fd[1]);
+				close(fd[0]);
+				execl(secondCom, secondCom, secondArg,(char*) NULL);
+				fprintf(stderr, "Failed to execute %s\n", secondCom);
+				exit(1);
+		}
+		else
+		{
+				int status;
+				close(fd[0]);
+				close(fd[1]);
+				waitpid(pid, &status, 0);
+		}
+	}
+}
+
 int runEcho(char* string)
 {
 	printf("%s\n", string);
+}
+
+int getDateTime()
+{
+time_t T= time(NULL);
+	struct  tm tm = *localtime(&T);
+	printf("%02d/%02d/%04d %02d:%02d:%02d\n",tm.tm_mday, tm.tm_mon+1, tm.tm_year+1900,tm.tm_hour, tm.tm_min, tm.tm_sec);
+	return 1;
 }

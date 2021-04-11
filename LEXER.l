@@ -75,43 +75,47 @@ cp					{ argc++; return CP; }
 mv					{ argc++; return MV; }
 ping				{ argc++; return PING; }
 echo        { argc++; return ECHO; }
+date        { argc++; return DATE; }
 "|"		      { return PIPE; }
 {CHAR}+     {
               argc++;
               //printf("%d\n", argc);
-              if(argc == 1) //if only one word inputted, check if word has alias
+              if(argc == 1) //if first word of input
               {
-                if(ifAlias(yytext) && strcmp(subAliases(yytext), "ls") == 0)
+                if(ifAlias(yytext) && strncmp(subAliases(yytext), "ls", strlen("ls")) == 0)
                 {
-                  return LS;
+                  //return LS;
+                  strcpy(yytext, subAliases(yytext));
+                  yylval.string = strdup(yytext);
+                  return STRING;
                 }
 
-                else if(ifAlias(yytext) && strcmp(subAliases(yytext), "cd") == 0)
+                else if(ifAlias(yytext) && strncmp(subAliases(yytext), "cd", strlen("cd")) == 0)
                 {
                   return CD;
                 }
 
-                else if(ifAlias(yytext) && strcmp(subAliases(yytext), "setenv") == 0)
+                else if(ifAlias(yytext) && strncmp(subAliases(yytext), "setenv", strlen("setenv")) == 0)
                 {
                   return SETENV;
                 }
 
-                else if(ifAlias(yytext) && strcmp(subAliases(yytext), "printenv") == 0)
+                else if(ifAlias(yytext) && strncmp(subAliases(yytext), "printenv", strlen("printenv")) == 0)
                 {
                   return PRINTENV;
                 }
 
-                else if(ifAlias(yytext) && strcmp(subAliases(yytext), "alias") == 0)
+                else if(ifAlias(yytext) && strncmp(subAliases(yytext), "alias", strlen("alias")) == 0)
                 {
                   return ALIAS;
                 }
 
-                else if(ifAlias(yytext) && strcmp(subAliases(yytext), "bye") == 0)
+                else if(ifAlias(yytext) && strncmp(subAliases(yytext), "bye", strlen("bye")) == 0)
                 {
                   return BYE;
                 }
 
-                else if(ifAlias(yytext) && strcmp(subAliases(yytext), "pwd") == 0)
+                else if(ifAlias(yytext) && strncmp(subAliases(yytext), "pwd", strlen("pwd")) == 0)
                 {
                   return PWD;
                 }

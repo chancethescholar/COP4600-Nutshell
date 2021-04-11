@@ -58,7 +58,8 @@
      MV = 274,
      PING = 275,
      PIPE = 276,
-     ECHO = 277
+     ECHO = 277,
+     DATE = 278
    };
 #endif
 /* Tokens.  */
@@ -82,16 +83,17 @@
 #define PING 275
 #define PIPE 276
 #define ECHO 277
+#define DATE 278
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 37 "PARSER.y"
+#line 40 "PARSER.y"
 {char *string;}
 /* Line 1529 of yacc.c.  */
-#line 95 "PARSER.tab.h"
+#line 97 "PARSER.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
