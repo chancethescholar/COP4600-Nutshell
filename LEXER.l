@@ -83,7 +83,6 @@ rm          { argc++; return RM; }
               argc++;
               if(ifAlias(yytext) && argc == 1)
   						{
-  							printf("yytext: %s\n", yytext);
   							char *yycopy = strdup(subAliases(yytext));
   							for (int i = strlen(subAliases(yytext)) - 1; i >= 0; --i)
   								unput(yycopy[i]);
@@ -92,7 +91,6 @@ rm          { argc++; return RM; }
 
               else
     					{
-    					  printf("yytext: %s\n", yytext);
     						yylval.string = strdup(yytext);
     						return STRING;
               }
