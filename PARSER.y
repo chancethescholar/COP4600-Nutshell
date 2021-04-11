@@ -19,6 +19,7 @@ int yyerror(char *s);
 int runSetEnv(char* variable, char* word);
 int runPrintEnv(void);
 int runUnsetEnv(char *variable);
+int runCDnoargs(void);
 int runCD(char* arg);
 int runSetAlias(char *name, char *word);
 int runListAlias(void);
@@ -51,6 +52,7 @@ cmd_line    :
 	| SETENV STRING STRING END	{runSetEnv($2, $3); return 1;}
 	| PRINTENV END					{runPrintEnv(); return 1;}
 	| UNSETENV STRING END		{runUnsetEnv($2); return 1;}
+	| CD END							{runCDnoargs(); return 1;}
 	| CD STRING END				{runCD($2); return 1;}
 	| ALIAS STRING STRING END	{runSetAlias($2, $3); return 1;}
 	| ALIAS	END					{runListAlias(); return 1;}
@@ -130,6 +132,16 @@ int runUnsetEnv(char *variable)
 		}
 	}
 	printf("Error, %s not found.\n", variable);
+	return 1;
+}
+
+int runCDnoargs(void)
+{
+	int result = chdir(getenv("HOME"));
+	if(result != 0)
+	{
+		printf("No such directory");
+	}
 	return 1;
 }
 
@@ -309,19 +321,20 @@ int runRemoveAlias(char *name)
 int runLS(void)
 {
 	DIR* dir;
-        dir = opendir(".");
-        struct dirent* dp;
-        if(dir)
-        {
-                while((dp = readdir(dir)) != NULL)
-                {
-                        printf("%s\n", dp -> d_name);
-              	}
-                closedir(dir);
-        }
-        else
-                printf("not valid");
-				return 1;
+  dir = opendir(".");
+  struct dirent* dp;
+  if(dir)
+  {
+  	while((dp = readdir(dir)) != NULL)
+    {
+    	printf("%s\t", dp -> d_name);
+    }
+		printf("\n");
+    closedir(dir);
+  }
+  else
+  	printf("The directory cannot be found");
+	return 1;
 }
 
 int runLSDIR(char* directory)

@@ -81,8 +81,9 @@ rm          { argc++; return RM; }
 "|"		      { return PIPE; }
 {CHAR}+     {
               argc++;
-              if(ifAlias(yytext) && argc == 1)
+              if(ifAlias(yytext) && argc == 1)//if alias exits for first word
   						{
+                //alias expansion
   							char *yycopy = strdup(subAliases(yytext));
   							for (int i = strlen(subAliases(yytext)) - 1; i >= 0; --i)
   								unput(yycopy[i]);

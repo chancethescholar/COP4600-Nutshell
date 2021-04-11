@@ -957,9 +957,9 @@ YY_RULE_SETUP
 #line 82 "LEXER.l"
 {
               argc++;
-              if(ifAlias(yytext) && argc == 1)
+              if(ifAlias(yytext) && argc == 1)//if alias exits for first word
   						{
-  							printf("yytext: %s\n", yytext);
+                //alias expansion
   							char *yycopy = strdup(subAliases(yytext));
   							for (int i = strlen(subAliases(yytext)) - 1; i >= 0; --i)
   								unput(yycopy[i]);
@@ -968,7 +968,6 @@ YY_RULE_SETUP
 
               else
     					{
-    					  printf("yytext: %s\n", yytext);
     						yylval.string = strdup(yytext);
     						return STRING;
               }
@@ -976,10 +975,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 100 "LEXER.l"
+#line 99 "LEXER.l"
 ECHO;
 	YY_BREAK
-#line 983 "lex.yy.c"
+#line 982 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(string_condition):
 	yyterminate();
@@ -1977,7 +1976,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 100 "LEXER.l"
+#line 99 "LEXER.l"
 
 
 
