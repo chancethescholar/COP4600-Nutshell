@@ -957,61 +957,29 @@ YY_RULE_SETUP
 #line 82 "LEXER.l"
 {
               argc++;
-              //printf("%d\n", argc);
-              if(argc == 1) //if first word of input
-              {
-                if(ifAlias(yytext) && strncmp(subAliases(yytext), "ls", strlen("ls")) == 0)
-                {
-                  //return LS;
-                  strcpy(yytext, subAliases(yytext));
-                  yylval.string = strdup(yytext);
-                  return STRING;
-                }
-
-                else if(ifAlias(yytext) && strncmp(subAliases(yytext), "cd", strlen("cd")) == 0)
-                {
-                  return CD;
-                }
-
-                else if(ifAlias(yytext) && strncmp(subAliases(yytext), "setenv", strlen("setenv")) == 0)
-                {
-                  return SETENV;
-                }
-
-                else if(ifAlias(yytext) && strncmp(subAliases(yytext), "printenv", strlen("printenv")) == 0)
-                {
-                  return PRINTENV;
-                }
-
-                else if(ifAlias(yytext) && strncmp(subAliases(yytext), "alias", strlen("alias")) == 0)
-                {
-                  return ALIAS;
-                }
-
-                else if(ifAlias(yytext) && strncmp(subAliases(yytext), "bye", strlen("bye")) == 0)
-                {
-                  return BYE;
-                }
-
-                else if(ifAlias(yytext) && strncmp(subAliases(yytext), "pwd", strlen("pwd")) == 0)
-                {
-                  return PWD;
-                }
-              }
+              if(ifAlias(yytext) && argc == 1)
+  						{
+  							printf("yytext: %s\n", yytext);
+  							char *yycopy = strdup(subAliases(yytext));
+  							for (int i = strlen(subAliases(yytext)) - 1; i >= 0; --i)
+  								unput(yycopy[i]);
+  							free(yycopy);
+  						}
 
               else
-              {
-                yylval.string = strdup(yytext);
-                return STRING;
-              };
+    					{
+    					  printf("yytext: %s\n", yytext);
+    						yylval.string = strdup(yytext);
+    						return STRING;
+              }
             }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 132 "LEXER.l"
+#line 100 "LEXER.l"
 ECHO;
 	YY_BREAK
-#line 1015 "lex.yy.c"
+#line 983 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(string_condition):
 	yyterminate();
@@ -2009,7 +1977,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 132 "LEXER.l"
+#line 100 "LEXER.l"
 
 
 

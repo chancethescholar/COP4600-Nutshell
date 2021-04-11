@@ -81,52 +81,20 @@ rm          { argc++; return RM; }
 "|"		      { return PIPE; }
 {CHAR}+     {
               argc++;
-              //printf("%d\n", argc);
-              if(argc == 1) //if first word of input
-              {
-                if(ifAlias(yytext) && strncmp(subAliases(yytext), "ls", strlen("ls")) == 0)
-                {
-                  //return LS;
-                  strcpy(yytext, subAliases(yytext));
-                  yylval.string = strdup(yytext);
-                  return STRING;
-                }
-
-                else if(ifAlias(yytext) && strncmp(subAliases(yytext), "cd", strlen("cd")) == 0)
-                {
-                  return CD;
-                }
-
-                else if(ifAlias(yytext) && strncmp(subAliases(yytext), "setenv", strlen("setenv")) == 0)
-                {
-                  return SETENV;
-                }
-
-                else if(ifAlias(yytext) && strncmp(subAliases(yytext), "printenv", strlen("printenv")) == 0)
-                {
-                  return PRINTENV;
-                }
-
-                else if(ifAlias(yytext) && strncmp(subAliases(yytext), "alias", strlen("alias")) == 0)
-                {
-                  return ALIAS;
-                }
-
-                else if(ifAlias(yytext) && strncmp(subAliases(yytext), "bye", strlen("bye")) == 0)
-                {
-                  return BYE;
-                }
-
-                else if(ifAlias(yytext) && strncmp(subAliases(yytext), "pwd", strlen("pwd")) == 0)
-                {
-                  return PWD;
-                }
-              }
+              if(ifAlias(yytext) && argc == 1)
+  						{
+  							printf("yytext: %s\n", yytext);
+  							char *yycopy = strdup(subAliases(yytext));
+  							for (int i = strlen(subAliases(yytext)) - 1; i >= 0; --i)
+  								unput(yycopy[i]);
+  							free(yycopy);
+  						}
 
               else
-              {
-                yylval.string = strdup(yytext);
-                return STRING;
-              };
+    					{
+    					  printf("yytext: %s\n", yytext);
+    						yylval.string = strdup(yytext);
+    						return STRING;
+              }
             }
 %%
