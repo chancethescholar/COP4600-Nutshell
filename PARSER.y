@@ -64,7 +64,7 @@ cmd_line    :
 	| MV STRING STRING END 		{runMV($2,$3); return 1;}
 	| PING END							{printf("ping: usage error: Destination address required\n"); return 1;}
 	| STRING STRING PIPE STRING STRING END 					{runPipe($1, $2, $4, $5); return 1;}
-	| ECHO STRING END 				{runEcho($2); return 1;}
+	//| ECHO STRING END 				{runEcho($2); return 1;}
 	| DATE END										{getDateTime(); return 1;}
 
 %%
