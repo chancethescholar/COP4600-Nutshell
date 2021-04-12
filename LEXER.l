@@ -79,6 +79,7 @@ date        { argc++; return DATE; }
 ssh         { argc++; return SSH; }
 rm          { argc++; return RM; }
 "|"		      { return PIPE; }
+<<EOF>>     { return END; }
 {CHAR}+     {
               argc++;
               if(ifAlias(yytext) && argc == 1)//if alias exits for first word

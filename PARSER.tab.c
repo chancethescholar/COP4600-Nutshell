@@ -153,7 +153,6 @@ int runCAT(char* file);
 int runWC(char* file);
 int runMV(char* source, char* destination);
 int runEcho(char* string);
-int runPing(char* address);
 int runPipe(char* firstCom, char* firstArg, char* secondCom, char* secondArg);
 int getDateTime();
 int runSSH(char* address);
@@ -183,10 +182,10 @@ int aliasSize = 0;
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 43 "PARSER.y"
+#line 42 "PARSER.y"
 {char *string;}
 /* Line 193 of yacc.c.  */
-#line 190 "PARSER.tab.c"
+#line 189 "PARSER.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -199,7 +198,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 203 "PARSER.tab.c"
+#line 202 "PARSER.tab.c"
 
 #ifdef short
 # undef short
@@ -493,9 +492,9 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    51,    51,    52,    53,    54,    55,    56,    57,    58,
-      59,    60,    61,    62,    63,    64,    65,    66,    67,    68,
-      69,    70,    72,    73,    74
+       0,    50,    50,    51,    52,    53,    54,    55,    56,    57,
+      58,    59,    60,    61,    62,    63,    64,    65,    66,    67,
+      68,    69,    71,    72,    73
 };
 #endif
 
@@ -1430,123 +1429,123 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 51 "PARSER.y"
+#line 50 "PARSER.y"
     {exit(1); return 1; ;}
     break;
 
   case 3:
-#line 52 "PARSER.y"
+#line 51 "PARSER.y"
     {runSetEnv((yyvsp[(2) - (4)].string), (yyvsp[(3) - (4)].string)); return 1;;}
     break;
 
   case 4:
-#line 53 "PARSER.y"
+#line 52 "PARSER.y"
     {runPrintEnv(); return 1;;}
     break;
 
   case 5:
-#line 54 "PARSER.y"
+#line 53 "PARSER.y"
     {runUnsetEnv((yyvsp[(2) - (3)].string)); return 1;;}
     break;
 
   case 6:
-#line 55 "PARSER.y"
+#line 54 "PARSER.y"
     {runCDnoargs(); return 1;;}
     break;
 
   case 7:
-#line 56 "PARSER.y"
+#line 55 "PARSER.y"
     {runCD((yyvsp[(2) - (3)].string)); return 1;;}
     break;
 
   case 8:
-#line 57 "PARSER.y"
+#line 56 "PARSER.y"
     {runSetAlias((yyvsp[(2) - (4)].string), (yyvsp[(3) - (4)].string)); return 1;;}
     break;
 
   case 9:
-#line 58 "PARSER.y"
+#line 57 "PARSER.y"
     {runListAlias(); return 1;;}
     break;
 
   case 10:
-#line 59 "PARSER.y"
+#line 58 "PARSER.y"
     {runRemoveAlias((yyvsp[(2) - (3)].string)); return 1;;}
     break;
 
   case 11:
-#line 60 "PARSER.y"
+#line 59 "PARSER.y"
     {runLS(); return 1;;}
     break;
 
   case 12:
-#line 61 "PARSER.y"
+#line 60 "PARSER.y"
     {runLSDIR((yyvsp[(2) - (3)].string)); return 1;;}
     break;
 
   case 13:
-#line 62 "PARSER.y"
+#line 61 "PARSER.y"
     {printf("%s\n", varTable.word[0]); return 1;;}
     break;
 
   case 14:
-#line 63 "PARSER.y"
+#line 62 "PARSER.y"
     {runWC((yyvsp[(2) - (3)].string)); return 1;;}
     break;
 
   case 15:
-#line 64 "PARSER.y"
+#line 63 "PARSER.y"
     {return 1;;}
     break;
 
   case 16:
-#line 65 "PARSER.y"
+#line 64 "PARSER.y"
     {return 1;;}
     break;
 
   case 17:
-#line 66 "PARSER.y"
+#line 65 "PARSER.y"
     {runCAT((yyvsp[(2) - (3)].string)); return 1;;}
     break;
 
   case 18:
-#line 67 "PARSER.y"
+#line 66 "PARSER.y"
     {return 1;;}
     break;
 
   case 19:
-#line 68 "PARSER.y"
+#line 67 "PARSER.y"
     {runMV((yyvsp[(2) - (4)].string),(yyvsp[(3) - (4)].string)); return 1;;}
     break;
 
   case 20:
-#line 69 "PARSER.y"
+#line 68 "PARSER.y"
     {printf("ping: usage error: Destination address required\n"); return 1;;}
     break;
 
   case 21:
-#line 70 "PARSER.y"
+#line 69 "PARSER.y"
     {runPipe((yyvsp[(1) - (6)].string), (yyvsp[(2) - (6)].string), (yyvsp[(4) - (6)].string), (yyvsp[(5) - (6)].string)); return 1;;}
     break;
 
   case 22:
-#line 72 "PARSER.y"
+#line 71 "PARSER.y"
     {getDateTime(); return 1;;}
     break;
 
   case 23:
-#line 73 "PARSER.y"
+#line 72 "PARSER.y"
     {runSSH((yyvsp[(2) - (3)].string)); return 1;;}
     break;
 
   case 24:
-#line 74 "PARSER.y"
+#line 73 "PARSER.y"
     {runRemove((yyvsp[(2) - (3)].string)); return 1;;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1550 "PARSER.tab.c"
+#line 1549 "PARSER.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1760,7 +1759,7 @@ yyreturn:
 }
 
 
-#line 76 "PARSER.y"
+#line 75 "PARSER.y"
 
 
 int yyerror(char *s)
@@ -2293,5 +2292,6 @@ int runRemove(char* arg)
 			close(fd[1]);
 			waitpid(pid, &status, 0);
 	}
+	return 1;
 }
 

@@ -30,7 +30,6 @@ int runCAT(char* file);
 int runWC(char* file);
 int runMV(char* source, char* destination);
 int runEcho(char* string);
-int runPing(char* address);
 int runPipe(char* firstCom, char* firstArg, char* secondCom, char* secondArg);
 int getDateTime();
 int runSSH(char* address);
@@ -605,4 +604,5 @@ int runRemove(char* arg)
 			close(fd[1]);
 			waitpid(pid, &status, 0);
 	}
+	return 1;
 }
