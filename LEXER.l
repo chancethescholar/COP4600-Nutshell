@@ -79,22 +79,26 @@ date        { argc++; return DATE; }
 ssh         { argc++; return SSH; }
 rm          { argc++; return RM; }
 "|"		      { return PIPE; }
-<<EOF>>     { return END; }
 {CHAR}+     {
               argc++;
-              if(ifAlias(yytext) && argc == 1)//if alias exits for first word
-  						{
+              if(ifAlias(yytext) && argc == 1)
+              {
                 //alias expansion
-  							char *yycopy = strdup(subAliases(yytext));
-  							for (int i = strlen(subAliases(yytext)) - 1; i >= 0; --i)
-  								unput(yycopy[i]);
-  							free(yycopy);
-  						}
+                while(ifAlias(yytext))
+                {
+                  char *yycopy = strdup(subAliases(yytext));
+                  for(int i = strlen(subAliases(yytext)) - 1; i >= 0; --i)
+                    unput(yycopy[i]);
+                  free(yycopy);
+
+                  strcpy(yytext, subAliases(yytext));
+                }
+              }
 
               else
-    					{
-    						yylval.string = strdup(yytext);
-    						return STRING;
+              {
+                yylval.string = strdup(yytext);
+                return STRING;
               }
             }
 %%
