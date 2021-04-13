@@ -74,7 +74,6 @@ cat					{ argc++; return CAT; }
 cp					{ argc++; return CP; }
 mv					{ argc++; return MV; }
 ping				{ argc++; return PING; }
-echo        { argc++; return ECHO; }
 date        { argc++; return DATE; }
 ssh         { argc++; return SSH; }
 rm          { argc++; return RM; }
