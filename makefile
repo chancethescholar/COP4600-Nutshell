@@ -1,6 +1,6 @@
 CC=/usr/bin/cc
 
-all:  bison-config flex-config main
+all:  bison-config flex-config code
 
 bison-config:
 	bison -d PARSER.y
@@ -8,8 +8,8 @@ bison-config:
 flex-config:
 	flex LEXER.l
 
-main:
-	$(CC) main.c PARSER.tab.c lex.yy.c -o main
+code:
+	gcc main.c PARSER.tab.c lex.yy.c -o main -lfl
 
 clean:
 	rm PARSER.tab.c PARSER.tab.h lex.yy.c main
