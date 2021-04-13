@@ -35,6 +35,9 @@ int runSSH(char* address);
 int runRemove(char* arg);
 int runPWD(void);
 int runEcho(char* arg);
+int runCP(char* s, char* d);
+int runTOUCH(char* arg);
+int runGrep(char* arg, char* filename);
 
 
 Node* head = NULL;
@@ -45,7 +48,7 @@ int aliasSize = 0;
 
 %start cmd_line
 %token <string> STRING SETENV PRINTENV UNSETENV CD ALIAS UNALIAS BYE END LS PWD
-%token <string> WC SORT PAGE CAT CP MV PING PIPE DATE SSH RM echoo
+%token <string> WC SORT PAGE CAT CP MV PING PIPE DATE SSH RM echoo TOUCH GREP
 
 %%
 cmd_line    :
@@ -65,7 +68,7 @@ cmd_line    :
 	| SORT END 								{return 1;}
 	| PAGE END 								{return 1;}
 	| CAT STRING END 						{runCAT($2); return 1;}
-	| CP END 								{return 1;}
+	| CP STRING STRING END 					{runCP($2,$3); return 1;}
 	| MV STRING STRING END 					{runMV($2,$3); return 1;}
 	| PING END								{printf("ping: usage error: Destination address required\n"); return 1;}
 	| STRING STRING PIPE STRING STRING END 	{runPipe($1, $2, $4, $5); return 1;}
@@ -73,8 +76,82 @@ cmd_line    :
 	| SSH STRING END						{runSSH($2); return 1;}
 	| RM STRING END							{runRemove($2); return 1;}
 	| echoo STRING END						{runEcho($2); return 1;}
+	| TOUCH STRING END						{runTOUCH($2); return 1;}
+	| GREP STRING STRING END				{runGrep($2, $3); return 1;}
 
 %%
+int runGrep(char* arg, char* filename)
+{
+	pid_t pid;
+	int fd[2];
+
+	pipe(fd);
+	pid = fork();
+
+	if(pid == 0)
+	{
+		execl("/bin/grep","grep", arg, filename, NULL);
+		perror("grep error");
+		exit(1);
+	}
+
+	else
+	{
+			int status;
+			close(fd[0]);
+			close(fd[1]);
+			waitpid(pid, &status, 0);
+	}
+	return 1;
+}
+int runTOUCH(char* arg)
+{
+	pid_t pid;
+	int fd[2];
+
+	pipe(fd);
+	pid = fork();
+
+	if(pid == 0)
+	{
+		execl("/bin/touch","touch", arg, NULL);
+		perror("touch error");
+		exit(1);
+	}
+
+	else
+	{
+			int status;
+			close(fd[0]);
+			close(fd[1]);
+			waitpid(pid, &status, 0);
+	}
+	return 1;
+}
+int runCP(char* s, char* d)
+{
+	pid_t pid;
+	int fd[2];
+
+	pipe(fd);
+	pid = fork();
+
+	if(pid == 0)
+	{
+		execl("/bin/cp","cp", s, d, NULL);
+		perror("cp error");
+		exit(1);
+	}
+
+	else
+	{
+			int status;
+			close(fd[0]);
+			close(fd[1]);
+			waitpid(pid, &status, 0);
+	}
+	return 1;
+}
 
 int runEcho(char* arg)
 {

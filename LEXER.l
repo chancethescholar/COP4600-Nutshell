@@ -78,6 +78,8 @@ ping				{ argc++; return PING; }
 date        		{ argc++; return DATE; }
 ssh         		{ argc++; return SSH; }
 rm          		{ argc++; return RM; }
+touch				{ argc++; return TOUCH;}
+grep				{ argc++; return GREP;}
 "|"		      		{ return PIPE; }
 {CHAR}+     		{
 					  argc++;
