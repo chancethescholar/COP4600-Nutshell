@@ -29,11 +29,13 @@ int runLSDIR(char* directory);
 int runCAT(char* file);
 int runWC(char* file);
 int runMV(char* source, char* destination);
-int runEcho(char* string);
 int runPipe(char* firstCom, char* firstArg, char* secondCom, char* secondArg);
 int getDateTime();
 int runSSH(char* address);
 int runRemove(char* arg);
+int runPWD(void);
+int runEcho(char* arg);
+
 
 Node* head = NULL;
 int aliasSize = 0;
@@ -43,36 +45,87 @@ int aliasSize = 0;
 
 %start cmd_line
 %token <string> STRING SETENV PRINTENV UNSETENV CD ALIAS UNALIAS BYE END LS PWD
-%token WC SORT PAGE CAT CP MV PING PIPE ECHO DATE SSH RM
+%token <string> WC SORT PAGE CAT CP MV PING PIPE DATE SSH RM echoo
 
 %%
 cmd_line    :
-	BYE END						{exit(1); return 1; }
-	| SETENV STRING STRING END	{runSetEnv($2, $3); return 1;}
-	| PRINTENV END					{runPrintEnv(); return 1;}
-	| UNSETENV STRING END		{runUnsetEnv($2); return 1;}
-	| CD END							{runCDnoargs(); return 1;}
-	| CD STRING END				{runCD($2); return 1;}
-	| ALIAS STRING STRING END	{runSetAlias($2, $3); return 1;}
-	| ALIAS	END					{runListAlias(); return 1;}
-	| UNALIAS STRING END		{runRemoveAlias($2); return 1;}
-	| LS END					{runLS(); return 1;}
-	| LS STRING END				{runLSDIR($2); return 1;}
-	| PWD END 					{printf("%s\n", varTable.word[0]); return 1;}
-	| WC STRING END 			{runWC($2); return 1;}
-	| SORT END 					{return 1;}
-	| PAGE END 					{return 1;}
-	| CAT STRING END 			{runCAT($2); return 1;}
-	| CP END 					{return 1;}
-	| MV STRING STRING END 		{runMV($2,$3); return 1;}
-	| PING END							{printf("ping: usage error: Destination address required\n"); return 1;}
-	| STRING STRING PIPE STRING STRING END 					{runPipe($1, $2, $4, $5); return 1;}
-	//| ECHO STRING END 				{runEcho($2); return 1;}
-	| DATE END										{getDateTime(); return 1;}
-	| SSH STRING END							{runSSH($2); return 1;}
-	| RM STRING END								{runRemove($2); return 1;}
+	BYE END									{exit(1); return 1; }
+	| SETENV STRING STRING END				{runSetEnv($2, $3); return 1;}
+	| PRINTENV END							{runPrintEnv(); return 1;}
+	| UNSETENV STRING END					{runUnsetEnv($2); return 1;}
+	| CD END								{runCDnoargs(); return 1;}
+	| CD STRING END							{runCD($2); return 1;}
+	| ALIAS STRING STRING END				{runSetAlias($2, $3); return 1;}
+	| ALIAS	END								{runListAlias(); return 1;}
+	| UNALIAS STRING END					{runRemoveAlias($2); return 1;}
+	| LS END								{runLS(); return 1;}
+	| LS STRING END							{runLSDIR($2); return 1;}
+	| PWD END 								{runPWD(); return 1;}
+	| WC STRING END 						{runWC($2); return 1;}
+	| SORT END 								{return 1;}
+	| PAGE END 								{return 1;}
+	| CAT STRING END 						{runCAT($2); return 1;}
+	| CP END 								{return 1;}
+	| MV STRING STRING END 					{runMV($2,$3); return 1;}
+	| PING END								{printf("ping: usage error: Destination address required\n"); return 1;}
+	| STRING STRING PIPE STRING STRING END 	{runPipe($1, $2, $4, $5); return 1;}
+	| DATE END								{getDateTime(); return 1;}
+	| SSH STRING END						{runSSH($2); return 1;}
+	| RM STRING END							{runRemove($2); return 1;}
+	| echoo STRING END						{runEcho($2); return 1;}
 
 %%
+
+int runEcho(char* arg)
+{
+	pid_t pid;
+	int fd[2];
+
+	pipe(fd);
+	pid = fork();
+
+	if(pid == 0)
+	{
+		execl("/bin/echo", "/bin/echo", arg, NULL);
+		perror("echo error");
+		exit(1);
+	}
+
+	else
+	{
+			int status;
+			close(fd[0]);
+			close(fd[1]);
+			waitpid(pid, &status, 0);
+	}
+	return 1;
+}
+
+int runPWD(void)
+{
+	pid_t pid;
+	int fd[2];
+
+	pipe(fd);
+	pid = fork();
+
+	if(pid == 0)
+	{
+		execl("/bin/pwd", "/bin/pwd", NULL, NULL);
+		perror("pwd error");
+		exit(1);
+	}
+
+	else
+	{
+			int status;
+			close(fd[0]);
+			close(fd[1]);
+			waitpid(pid, &status, 0);
+	}
+	return 1;
+}
+	
 
 int yyerror(char *s)
 {
@@ -362,15 +415,27 @@ int runLSDIR(char* directory)
 
 int runCAT(char* file)
 {
-	FILE *fp;
-	fp = fopen(file, "r");
-	char line[256];
+	pid_t pid;
+	int fd[2];
 
-    while (fgets(line, sizeof(line), fp)) {
-        printf("%s", line);
-    }
-    fclose(fp);
-    return 1;
+	pipe(fd);
+	pid = fork();
+
+	if(pid == 0)
+	{
+		execl("/bin/cat", "cat", file, NULL);
+		perror("cat error");
+		exit(1);
+	}
+
+	else
+	{
+			int status;
+			close(fd[0]);
+			close(fd[1]);
+			waitpid(pid, &status, 0);
+	}
+	return 1;
 }
 
 int runWC(char* file)
@@ -419,88 +484,26 @@ int runWC(char* file)
 
 int runMV(char* source, char* destination)
 {
-	bool src_isFile = false;
-	bool destn_isFile = false;
+	pid_t pid;
+	int fd[2];
 
-	DIR* src_directory = opendir(source);
-	DIR* destn_directory = opendir(destination);
+	pipe(fd);
+	pid = fork();
 
-	if(src_directory == NULL)
-		src_isFile = true;
-
-	if(destn_directory == NULL)
-		destn_isFile = true;
-
-	if(src_isFile == true && destn_isFile == true)
+	if(pid == 0)
 	{
-		FILE *fp1;
-		FILE *fp2;
-		fp1 = fopen(source, "r");
-		fp2 = fopen(destination, "w");
-		char ch;
-
-		while ((ch = fgetc(fp1)) != EOF)
-		{
-			fputc(ch, fp2);
-		}
-		fclose(fp1);
-		fclose(fp2);
-		remove(source);
+		execl("/bin/mv","mv", source, destination, NULL);
+		perror("mv error");
+		exit(1);
 	}
-	else if(src_isFile == true && destn_isFile == false)
+
+	else
 	{
-		char* slash = "/";
-
-		FILE *fp1;
-		FILE *fp2;
-
-		strcat(destination, slash);
-		strcat(destination, source);
-
-		fp1 = fopen(source, "r");
-		fp2 = fopen(destination, "w");
-		char ch;
-
-		while ((ch = fgetc(fp1)) != EOF)
-		{
-			fputc(ch, fp2);
-		}
-		fclose(fp1);
-		fclose(fp2);
-		remove(source);
+			int status;
+			close(fd[0]);
+			close(fd[1]);
+			waitpid(pid, &status, 0);
 	}
-	/*else if(src_isFile == false && destn_isFile == false)
-	{
-		char *substr;
-		int index = 0;
-		int count = 0;
-		for(int i = 0; i < strlen(source); i++)
-		{
-			if(source[i] == '/')
-			{
-				index = i;
-				count = 0;
-			}
-			count++;
-		}
-		strnpy(substr, source[index + 1], count];
-		printf("%s", substr);
-		/*FILE *fp1;
-		FILE *fp2;
-
-		fp1 = fopen(source, "r");
-		fp2 = fopen(destination, "w");
-		char ch;
-
-		while ((ch = fgetc(fp1)) != EOF)
-		{
-			fputc(ch, fp2);
-		}
-		fclose(fp1);
-		fclose(fp2);
-		remove(source);
-
-	}*/
 	return 1;
 }
 
@@ -544,11 +547,6 @@ int runPipe(char* firstCom, char* firstArg, char* secondCom, char* secondArg)
 	}
 }
 
-int runEcho(char* string)
-{
-	printf("%s\n", string);
-}
-
 int getDateTime()
 {
 	time_t T= time(NULL);
@@ -585,7 +583,7 @@ int runSSH(char* address)
 int runRemove(char* arg)
 {
 	pid_t pid;
-	int fd[1];
+	int fd[2];
 
 	pipe(fd);
 	pid = fork();

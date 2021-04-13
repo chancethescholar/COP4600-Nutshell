@@ -56,6 +56,7 @@ ANYCHAR            [)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][)(*&%$#@!`;,\.a-zA-Z0-9'/*_
 <string_condition>[\"]          {BEGIN(INITIAL);}
 
 [ ]           { }
+echo				{ argc++; return echoo; }
 setenv				{ argc++; return SETENV; }
 printenv			{ argc++; return PRINTENV; }
 unsetenv			{ argc++; return UNSETENV; }
@@ -74,30 +75,30 @@ cat					{ argc++; return CAT; }
 cp					{ argc++; return CP; }
 mv					{ argc++; return MV; }
 ping				{ argc++; return PING; }
-date        { argc++; return DATE; }
-ssh         { argc++; return SSH; }
-rm          { argc++; return RM; }
-"|"		      { return PIPE; }
-{CHAR}+     {
-              argc++;
-              if(ifAlias(yytext) && argc == 1)
-              {
-                //alias expansion
-                while(ifAlias(yytext))
-                {
-                  char *yycopy = strdup(subAliases(yytext));
-                  for(int i = strlen(subAliases(yytext)) - 1; i >= 0; --i)
-                    unput(yycopy[i]);
-                  free(yycopy);
+date        		{ argc++; return DATE; }
+ssh         		{ argc++; return SSH; }
+rm          		{ argc++; return RM; }
+"|"		      		{ return PIPE; }
+{CHAR}+     		{
+					  argc++;
+					  if(ifAlias(yytext) && argc == 1)
+					  {
+						//alias expansion
+						while(ifAlias(yytext))
+						{
+						  char *yycopy = strdup(subAliases(yytext));
+						  for(int i = strlen(subAliases(yytext)) - 1; i >= 0; --i)
+							unput(yycopy[i]);
+						  free(yycopy);
 
-                  strcpy(yytext, subAliases(yytext));
-                }
-              }
+						  strcpy(yytext, subAliases(yytext));
+						}
+					  }
 
-              else
-              {
-                yylval.string = strdup(yytext);
-                return STRING;
-              }
-            }
+					  else
+					  {
+						yylval.string = strdup(yytext);
+						return STRING;
+					  }
+					}
 %%
