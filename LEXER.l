@@ -58,7 +58,20 @@ char* envExpansion(char* arg)
 		temp++;
 	}
 	sub[temp] = '\0';
-	//printf(sub);
+	
+	
+	if(strcmp(sub, "PWD") == 0)
+		return varTable.word[0];
+		
+	else if(strcmp(sub, "HOME") == 0)
+		return varTable.word[1];
+		
+	else if(strcmp(sub, "PROMPT") == 0)
+		return varTable.word[2];
+		
+	else if(strcmp(sub, "PATH") == 0)
+		return varTable.word[3];
+	
 	return getenv(sub);
 }
 

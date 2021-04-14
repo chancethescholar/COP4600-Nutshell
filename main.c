@@ -18,15 +18,22 @@ int main()
 
     strcpy(varTable.var[varIndex], "PWD");
     strcpy(varTable.word[varIndex], cwd);
+	setenv("PWD", cwd, 0);
     varIndex++;
+	
     strcpy(varTable.var[varIndex], "HOME");
     strcpy(varTable.word[varIndex], cwd);
+	setenv("HOME", cwd, 0);
     varIndex++;
+	
     strcpy(varTable.var[varIndex], "PROMPT");
     strcpy(varTable.word[varIndex], "shell");
+	setenv("PROMPT", "shell", 0);
     varIndex++;
+	
     strcpy(varTable.var[varIndex], "PATH");
     strcpy(varTable.word[varIndex], ".:/bin");
+	setenv("PATH", ".:/bin", 0);
     varIndex++;
 
     system("clear");
