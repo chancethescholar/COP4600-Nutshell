@@ -82,7 +82,8 @@ char* envExpansion(char* arg)
 %x string_condition
 
 CHAR            [.A-Za-z0-9!\/_-][.A-Za-z0-9!\/_-]*
-ANYCHAR            [)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -]*
+ANYCHAR         [:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -]*
+PATH			[:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~-][:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~-]*
 
 %%
 
@@ -138,4 +139,5 @@ grep				{ argc++; return GREP;}
 						return STRING;
 					  }
 					}
+{PATH}+				{yylval.string = strdup(yytext); return STRING;}
 %%

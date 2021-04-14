@@ -214,6 +214,30 @@ int yyerror(char *s)
 
 int runSetEnv(char* variable, char* word)
 {
+	if(strcmp(variable, "PWD") == 0)
+	{
+		strcpy(varTable.word[0], word);
+		return 1;
+	}
+		
+	else if(strcmp(variable, "HOME") == 0)
+	{
+		strcpy(varTable.word[1], word);
+		return 1;
+	}
+		
+	else if(strcmp(variable, "PROMPT") == 0)
+	{
+		strcpy(varTable.word[2], word);
+		return 1;
+	}
+		
+	else if(strcmp(variable, "PATH") == 0)
+	{
+		strcpy(varTable.word[3], word);
+		return 1;
+	}
+		
 	setenv(variable, word, 1);
 	var_count++;
 	return 1;
@@ -247,6 +271,12 @@ int runPrintEnv()
 
 int runUnsetEnv(char *variable)
 {
+	if(strcmp(variable, "PWD") == 0 || strcmp(variable, "HOME") == 0 || strcmp(variable, "PROMPT") == 0 || strcmp(variable, "PATH") == 0)
+	{
+		fprintf(stderr, "Error: Cannot unset %s\n", variable);
+		return 0;
+	}
+		
 	unsetenv(variable);
 	var_count--;
 	return 1;
