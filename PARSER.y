@@ -47,8 +47,8 @@ int aliasSize = 0;
 %union {char *string;}
 
 %start cmd_line
-%token <string> STRING SETENV PRINTENV UNSETENV CD ALIAS UNALIAS BYE END LS PWD
-%token <string> WC SORT PAGE CAT CP MV PING PIPE DATE SSH RM echoo TOUCH GREP ENV
+%token <string> STRING SETENV PRINTENV UNSETENV CD ALIAS UNALIAS BYE END LS PWD WC SORT PAGE CAT
+%token <string> CP MV PING PIPE DATE SSH RM echoo TOUCH GREP ENV GT LT GTGT ERROR1 BASH
 
 %%
 cmd_line    :
@@ -79,6 +79,7 @@ cmd_line    :
 	| TOUCH STRING END						{runTOUCH($2); return 1;}
 	| GREP STRING STRING END				{runGrep($2, $3); return 1;}
 	| ENV STRING END						{printf("hello"); return 1; }
+	
 
 %%
 int runGrep(char* arg, char* filename)

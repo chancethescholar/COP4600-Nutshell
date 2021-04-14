@@ -92,6 +92,11 @@ PATH			[:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~-][:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~-]*
 [$][{]{CHAR}+[}]				{ argc++; yylval.string = envExpansion(yytext); return STRING;}
 
 [ ]           { }
+">"					{argc++; return GT;}
+"<"					{argc++; return LT;}
+">>"				{argc++; return GTGT;}
+"2>&1"				{argc++; return ERROR1;}
+"&"					{argc++; return BASH;}
 echo				{ argc++; return echoo; }
 setenv				{ argc++; return SETENV; }
 printenv			{ argc++; return PRINTENV; }
