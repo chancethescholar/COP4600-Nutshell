@@ -17,7 +17,7 @@ char* getcwd();
 int yylex(void);
 int yyerror(char *s);
 int runSetEnv(char* variable, char* word);
-int runPrintEnv(void);
+int runPrintEnv();
 int runUnsetEnv(char *variable);
 int runCDnoargs(void);
 int runCD(char* arg);
@@ -213,54 +213,41 @@ int yyerror(char *s)
 
 int runSetEnv(char* variable, char* word)
 {
-	if(strcmp(variable, word) == 0)
-	{
-		printf("Error, expansion of \"%s\" would create a loop.\n", variable);
-		return 1;
-	}
-
-	for (int i = 0; i < varIndex; i++)
-	{
-		if((strcmp(varTable.var[i], variable) == 0) && (strcmp(varTable.word[i], word) == 0)){
-			printf("Error, expansion of \"%s\" would create a loop.\n", variable);
-			return 1;
-		}
-		else if(strcmp(varTable.var[i], variable) == 0) {
-			strcpy(varTable.word[i], word);
-			return 1;
-		}
-	}
-	strcpy(varTable.var[varIndex], variable);
-	strcpy(varTable.word[varIndex], word);
-	varIndex++;
-
+	
+	setenv(variable, word, 1);
+	var_count++;
 	return 1;
 
 }
 
-int runPrintEnv(void)
+int runPrintEnv()
 {
-	for(int i = 0; i < varIndex; i++) {
+	for(int i = 0; i < varIndex; i++) 
+	{
 		printf("%s=", varTable.var[i]);
 		printf("%s\n", varTable.word[i]);
 	}
-	return 1;
+	
+	int count = 0;
+	int i = 0;
+	while(environ[i])
+	{
+		count++;
+		i++;
+	}
+	
+	i = count - var_count;
+	while(environ[i]) 
+	{
+	  printf("%s\n", environ[i++]);
+	}
+	
+    return 1;
 }
 
 int runUnsetEnv(char *variable)
 {
-	char reset[100];
-	for(int i = 0; i < varIndex; i++)
-	{
-		if(strcmp(varTable.var[i], variable ) == 0)
-		{
-			strcpy(varTable.var[i], reset);
-			strcpy(varTable.word[i], reset);
-			varIndex--;
-			return 1;
-		}
-	}
-	printf("Error, %s not found.\n", variable);
+	unsetenv(variable);
 	return 1;
 }
 
