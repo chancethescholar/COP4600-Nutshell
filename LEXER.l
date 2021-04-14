@@ -41,6 +41,27 @@ bool ifAlias(char* name)
   return false;
 }
 
+char* envExpansion(char* arg)
+{ 
+	char sub[1000];
+	
+	int size = 0;
+	while(arg[size] != '\0')
+	{
+		size++;
+	}
+
+	int position = 2, temp = 0;
+	while (temp < size - 3) 
+	{
+		sub[temp] = arg[position+temp];
+		temp++;
+	}
+	sub[temp] = '\0';
+	//printf(sub);
+	return getenv(sub);
+}
+
 %}
 
 %array
@@ -52,8 +73,9 @@ ANYCHAR            [)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][)(*&%$#@!`;,\.a-zA-Z0-9'/*_
 
 %%
 
-<string_condition>{ANYCHAR}+     { yylval.string = strdup(yytext); return STRING;}
-<string_condition>[\"]          {BEGIN(INITIAL);}
+<string_condition>{ANYCHAR}+    { yylval.string = strdup(yytext); return STRING;}
+<string_condition>[\"]          { BEGIN(INITIAL);}
+[$][{]{CHAR}+[}]				{ argc++; yylval.string = envExpansion(yytext); return STRING;}
 
 [ ]           { }
 echo				{ argc++; return echoo; }

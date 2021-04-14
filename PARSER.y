@@ -48,7 +48,7 @@ int aliasSize = 0;
 
 %start cmd_line
 %token <string> STRING SETENV PRINTENV UNSETENV CD ALIAS UNALIAS BYE END LS PWD
-%token <string> WC SORT PAGE CAT CP MV PING PIPE DATE SSH RM echoo TOUCH GREP
+%token <string> WC SORT PAGE CAT CP MV PING PIPE DATE SSH RM echoo TOUCH GREP ENV
 
 %%
 cmd_line    :
@@ -78,6 +78,7 @@ cmd_line    :
 	| echoo STRING END						{runEcho($2); return 1;}
 	| TOUCH STRING END						{runTOUCH($2); return 1;}
 	| GREP STRING STRING END				{runGrep($2, $3); return 1;}
+	| ENV STRING END						{printf("hello"); return 1; }
 
 %%
 int runGrep(char* arg, char* filename)
@@ -170,10 +171,10 @@ int runEcho(char* arg)
 
 	else
 	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
+		int status;
+		close(fd[0]);
+		close(fd[1]);
+		waitpid(pid, &status, 0);
 	}
 	return 1;
 }
@@ -213,7 +214,6 @@ int yyerror(char *s)
 
 int runSetEnv(char* variable, char* word)
 {
-	
 	setenv(variable, word, 1);
 	var_count++;
 	return 1;
@@ -248,6 +248,7 @@ int runPrintEnv()
 int runUnsetEnv(char *variable)
 {
 	unsetenv(variable);
+	var_count--;
 	return 1;
 }
 
@@ -290,7 +291,8 @@ int runCD(char* arg)
 	}
 }
 
-int runSetAlias(char *name, char *word) {
+int runSetAlias(char *name, char *word) 
+{
 	if(strcmp(name, word) == 0)
 	{
 		printf("Error, expansion of \"%s\" would create a loop.\n", name);
@@ -388,7 +390,8 @@ int runRemoveAlias(char *name)
 {
 	if(aliasSize == 0) //if no aliases exist
 	{
-		printf("Error: No alias %s found\n", name);
+		fprintf(stderr, "Error: Alias %s not found\n", name);
+		return 0;
 	}
 
 	Node* current = head;
@@ -412,6 +415,7 @@ int runRemoveAlias(char *name)
 	else if(current -> next == NULL)
 	{
 		fprintf(stderr, "Error: Alias %s not found\n", name);
+		return 0;
 	}
 
 	else
@@ -429,6 +433,7 @@ int runRemoveAlias(char *name)
 			current = current -> next;
 		}
 		fprintf(stderr, "Error: Alias %s not found\n", name);
+		return 0;
 	}
 	return 1;
 
