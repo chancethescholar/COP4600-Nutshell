@@ -17,7 +17,7 @@ char* getcwd();
 int yylex(void);
 int yyerror(char *s);
 int runSetEnv(char* variable, char* word);
-int runPrintEnv(void);
+int runPrintEnv();
 int runUnsetEnv(char *variable);
 int runCDnoargs(void);
 int runCD(char* arg);
@@ -48,7 +48,7 @@ int aliasSize = 0;
 
 %start cmd_line
 %token <string> STRING SETENV PRINTENV UNSETENV CD ALIAS UNALIAS BYE END LS PWD
-%token <string> WC SORT PAGE CAT CP MV PING PIPE DATE SSH RM echoo TOUCH GREP
+%token <string> WC SORT PAGE CAT CP MV PING PIPE DATE SSH RM echoo TOUCH GREP ENV
 
 %%
 cmd_line    :
@@ -78,6 +78,7 @@ cmd_line    :
 	| echoo STRING END						{runEcho($2); return 1;}
 	| TOUCH STRING END						{runTOUCH($2); return 1;}
 	| GREP STRING STRING END				{runGrep($2, $3); return 1;}
+	| ENV STRING END						{printf("hello"); return 1; }
 
 %%
 int runGrep(char* arg, char* filename)
@@ -170,10 +171,10 @@ int runEcho(char* arg)
 
 	else
 	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
+		int status;
+		close(fd[0]);
+		close(fd[1]);
+		waitpid(pid, &status, 0);
 	}
 	return 1;
 }
@@ -213,54 +214,71 @@ int yyerror(char *s)
 
 int runSetEnv(char* variable, char* word)
 {
-	if(strcmp(variable, word) == 0)
+	if(strcmp(variable, "PWD") == 0)
 	{
-		printf("Error, expansion of \"%s\" would create a loop.\n", variable);
+		strcpy(varTable.word[0], word);
 		return 1;
 	}
-
-	for (int i = 0; i < varIndex; i++)
+		
+	else if(strcmp(variable, "HOME") == 0)
 	{
-		if((strcmp(varTable.var[i], variable) == 0) && (strcmp(varTable.word[i], word) == 0)){
-			printf("Error, expansion of \"%s\" would create a loop.\n", variable);
-			return 1;
-		}
-		else if(strcmp(varTable.var[i], variable) == 0) {
-			strcpy(varTable.word[i], word);
-			return 1;
-		}
+		strcpy(varTable.word[1], word);
+		return 1;
 	}
-	strcpy(varTable.var[varIndex], variable);
-	strcpy(varTable.word[varIndex], word);
-	varIndex++;
-
+		
+	else if(strcmp(variable, "PROMPT") == 0)
+	{
+		strcpy(varTable.word[2], word);
+		return 1;
+	}
+		
+	else if(strcmp(variable, "PATH") == 0)
+	{
+		strcpy(varTable.word[3], word);
+		return 1;
+	}
+		
+	setenv(variable, word, 1);
+	var_count++;
 	return 1;
 
 }
 
-int runPrintEnv(void)
+int runPrintEnv()
 {
-	for(int i = 0; i < varIndex; i++) {
+	for(int i = 0; i < varIndex; i++) 
+	{
 		printf("%s=", varTable.var[i]);
 		printf("%s\n", varTable.word[i]);
 	}
-	return 1;
+	
+	int count = 0;
+	int i = 0;
+	while(environ[i])
+	{
+		count++;
+		i++;
+	}
+	
+	i = count - var_count;
+	while(environ[i]) 
+	{
+	  printf("%s\n", environ[i++]);
+	}
+	
+    return 1;
 }
 
 int runUnsetEnv(char *variable)
 {
-	char reset[100];
-	for(int i = 0; i < varIndex; i++)
+	if(strcmp(variable, "PWD") == 0 || strcmp(variable, "HOME") == 0 || strcmp(variable, "PROMPT") == 0 || strcmp(variable, "PATH") == 0)
 	{
-		if(strcmp(varTable.var[i], variable ) == 0)
-		{
-			strcpy(varTable.var[i], reset);
-			strcpy(varTable.word[i], reset);
-			varIndex--;
-			return 1;
-		}
+		fprintf(stderr, "Error: Cannot unset %s\n", variable);
+		return 0;
 	}
-	printf("Error, %s not found.\n", variable);
+		
+	unsetenv(variable);
+	var_count--;
 	return 1;
 }
 
@@ -303,7 +321,8 @@ int runCD(char* arg)
 	}
 }
 
-int runSetAlias(char *name, char *word) {
+int runSetAlias(char *name, char *word) 
+{
 	if(strcmp(name, word) == 0)
 	{
 		printf("Error, expansion of \"%s\" would create a loop.\n", name);
@@ -401,7 +420,8 @@ int runRemoveAlias(char *name)
 {
 	if(aliasSize == 0) //if no aliases exist
 	{
-		printf("Error: No alias %s found\n", name);
+		fprintf(stderr, "Error: Alias %s not found\n", name);
+		return 0;
 	}
 
 	Node* current = head;
@@ -425,6 +445,7 @@ int runRemoveAlias(char *name)
 	else if(current -> next == NULL)
 	{
 		fprintf(stderr, "Error: Alias %s not found\n", name);
+		return 0;
 	}
 
 	else
@@ -442,6 +463,7 @@ int runRemoveAlias(char *name)
 			current = current -> next;
 		}
 		fprintf(stderr, "Error: Alias %s not found\n", name);
+		return 0;
 	}
 	return 1;
 

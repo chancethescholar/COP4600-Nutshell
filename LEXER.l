@@ -41,6 +41,40 @@ bool ifAlias(char* name)
   return false;
 }
 
+char* envExpansion(char* arg)
+{ 
+	char sub[1000];
+	
+	int size = 0;
+	while(arg[size] != '\0')
+	{
+		size++;
+	}
+
+	int position = 2, temp = 0;
+	while (temp < size - 3) 
+	{
+		sub[temp] = arg[position+temp];
+		temp++;
+	}
+	sub[temp] = '\0';
+	
+	
+	if(strcmp(sub, "PWD") == 0)
+		return varTable.word[0];
+		
+	else if(strcmp(sub, "HOME") == 0)
+		return varTable.word[1];
+		
+	else if(strcmp(sub, "PROMPT") == 0)
+		return varTable.word[2];
+		
+	else if(strcmp(sub, "PATH") == 0)
+		return varTable.word[3];
+	
+	return getenv(sub);
+}
+
 %}
 
 %array
@@ -48,12 +82,14 @@ bool ifAlias(char* name)
 %x string_condition
 
 CHAR            [.A-Za-z0-9!\/_-][.A-Za-z0-9!\/_-]*
-ANYCHAR            [)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -]*
+ANYCHAR         [:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -]*
+PATH			[:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~-][:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~-]*
 
 %%
 
-<string_condition>{ANYCHAR}+     { yylval.string = strdup(yytext); return STRING;}
-<string_condition>[\"]          {BEGIN(INITIAL);}
+<string_condition>{ANYCHAR}+    { yylval.string = strdup(yytext); return STRING;}
+<string_condition>[\"]          { BEGIN(INITIAL);}
+[$][{]{CHAR}+[}]				{ argc++; yylval.string = envExpansion(yytext); return STRING;}
 
 [ ]           { }
 echo				{ argc++; return echoo; }
@@ -103,4 +139,5 @@ grep				{ argc++; return GREP;}
 						return STRING;
 					  }
 					}
+{PATH}+				{yylval.string = strdup(yytext); return STRING;}
 %%
