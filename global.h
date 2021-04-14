@@ -58,3 +58,4 @@ int var_count;
 
 char* getPath(char* command);
 int contains(char* string, char character);
+int wildcardLS(char* arg);

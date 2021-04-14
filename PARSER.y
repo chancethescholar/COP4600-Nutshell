@@ -367,6 +367,12 @@ int runPipe(char* firstCom, char* firstArg, char* secondCom, char* secondArg)
 
 int runNonBuiltin(char* command, char* arg)
 {
+	if(contains(arg, '*.'))
+	{
+		wildcardLS(arg);
+		return 1;
+	}
+
 	char* target = getPath(command);
 
 	pid_t pid;
@@ -527,9 +533,47 @@ int contains(char* string, char character)
 	{
 		if(string[i] == character)
 		{
+			//printf("%s\n", string[i]);
 			return 1;
 		}
 	}
 
 	return 0;
+}
+
+int wildcardLS(char* arg)
+{
+	if(contains(arg, '*.'))
+	{
+		char* extension = strtok(arg, ".");
+
+		DIR *d;
+		d = opendir(".");
+		char *p;
+		struct dirent *dir;
+
+		if(d)
+		{
+				while((dir = readdir(d)) != NULL)
+				{
+						p = strtok(dir -> d_name, ".");
+						p = strtok(NULL, ".");
+						if(p != NULL)
+						{
+							if(strcmp(p, extension) == 0)
+							{
+									char* filename[50];
+									strcat(filename, dir -> d_name);
+									strcat(filename, ".");
+									strcat(filename, p);
+									printf("\t%s", filename);
+									strcpy(filename, "");
+							}
+						}
+				}
+				printf("\n");
+				closedir(d);
+		}
+	}
+	return 1;
 }
