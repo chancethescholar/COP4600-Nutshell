@@ -105,44 +105,31 @@ cd		            { argc++; return CD; }
 alias		        { argc++; return ALIAS; }
 unalias				{ argc++; return UNALIAS; }
 bye                 { argc++; return BYE; }
-"\n"		        { return END; }
+"\n"            	{ return END; }
 [\"]                { BEGIN(string_condition); }
-ls					{ argc++; return LS; }
-pwd					{ argc++; return PWD; }
-wc					{ argc++; return WC; }
-sort				{ argc++; return SORT; }
-page				{ argc++; return PAGE; }
-cat					{ argc++; return CAT; }
-cp					{ argc++; return CP; }
-mv					{ argc++; return MV; }
-ping				{ argc++; return PING; }
-date        		{ argc++; return DATE; }
-ssh         		{ argc++; return SSH; }
-rm          		{ argc++; return RM; }
-touch				{ argc++; return TOUCH;}
-grep				{ argc++; return GREP;}
-"|"		      		{ return PIPE; }
-{CHAR}+     		{
-					  argc++;
-					  if(ifAlias(yytext) && argc == 1)
-					  {
-						//alias expansion
-						while(ifAlias(yytext))
-						{
-						  char *yycopy = strdup(subAliases(yytext));
-						  for(int i = strlen(subAliases(yytext)) - 1; i >= 0; --i)
-							unput(yycopy[i]);
-						  free(yycopy);
+"|"             	{ return PIPE; }
+{CHAR}+         	{
+	                  argc++;
+	                  if(ifAlias(yytext) && argc == 1)
+	                  {
+	                    //alias expansion
+	                    while(ifAlias(yytext))
+	                    {
+	                      char* yycopy = strdup(subAliases(yytext));
 
-						  strcpy(yytext, subAliases(yytext));
-						}
-					  }
+	                      for(int i = strlen(yycopy) - 1; i >= 0; --i)
+	                        unput(yycopy[i]);
+	                      free(yycopy);
 
-					  else
-					  {
-						yylval.string = strdup(yytext);
-						return STRING;
-					  }
-					}
-{PATH}+				{yylval.string = strdup(yytext); return STRING;}
+	                      strcpy(yytext, subAliases(strdup(yytext)));
+	                    }
+	                    argc++;
+	                  }
+
+	                  else
+	                  {
+	                    yylval.string = strdup(yytext);
+	                    return STRING;
+	                  }
+	                }
 %%

@@ -24,21 +24,11 @@ int runCD(char* arg);
 int runSetAlias(char *name, char *word);
 int runListAlias(void);
 int runRemoveAlias(char *name);
-int runLS(void);
-int runLSDIR(char* directory);
-int runCAT(char* file);
-int runWC(char* file);
-int runMV(char* source, char* destination);
 int runPipe(char* firstCom, char* firstArg, char* secondCom, char* secondArg);
-int getDateTime();
-int runSSH(char* address);
-int runRemove(char* arg);
-int runPWD(void);
-int runEcho(char* arg);
-int runCP(char* s, char* d);
-int runTOUCH(char* arg);
-int runGrep(char* arg, char* filename);
-
+int runNonBuiltin(char* command, char* arg);
+int runNonBuiltInTwo(char* command, char* arg1, char* arg2);
+int runNonBuiltInThree(char* command, char* arg1, char* arg2, char* arg3);
+int runNonBuiltInNone(char* command);
 
 Node* head = NULL;
 int aliasSize = 0;
@@ -61,151 +51,13 @@ cmd_line    :
 	| ALIAS STRING STRING END				{runSetAlias($2, $3); return 1;}
 	| ALIAS	END								{runListAlias(); return 1;}
 	| UNALIAS STRING END					{runRemoveAlias($2); return 1;}
-	| LS END								{runLS(); return 1;}
-	| LS STRING END							{runLSDIR($2); return 1;}
-	| PWD END 								{runPWD(); return 1;}
-	| WC STRING END 						{runWC($2); return 1;}
-	| SORT END 								{return 1;}
-	| PAGE END 								{return 1;}
-	| CAT STRING END 						{runCAT($2); return 1;}
-	| CP STRING STRING END 					{runCP($2,$3); return 1;}
-	| MV STRING STRING END 					{runMV($2,$3); return 1;}
-	| PING END								{printf("ping: usage error: Destination address required\n"); return 1;}
 	| STRING STRING PIPE STRING STRING END 	{runPipe($1, $2, $4, $5); return 1;}
-	| DATE END								{getDateTime(); return 1;}
-	| SSH STRING END						{runSSH($2); return 1;}
-	| RM STRING END							{runRemove($2); return 1;}
-	| echoo STRING END						{runEcho($2); return 1;}
-	| TOUCH STRING END						{runTOUCH($2); return 1;}
-	| GREP STRING STRING END				{runGrep($2, $3); return 1;}
-	| ENV STRING END						{printf("hello"); return 1; }
-	
+	| STRING STRING END							{runNonBuiltin($1, $2); return 1;}
+	| STRING STRING STRING END			{runNonBuiltInTwo($1, $2, $3); return 1;}
+	| STRING STRING STRING STRING END			{runNonBuiltInThree($1, $2, $3, $4); return 1;}
+	| STRING END										{runNonBuiltInNone($1); return 1;}
 
 %%
-int runGrep(char* arg, char* filename)
-{
-	pid_t pid;
-	int fd[2];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-		execl("/bin/grep","grep", arg, filename, NULL);
-		perror("grep error");
-		exit(1);
-	}
-
-	else
-	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
-	}
-	return 1;
-}
-int runTOUCH(char* arg)
-{
-	pid_t pid;
-	int fd[2];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-		execl("/bin/touch","touch", arg, NULL);
-		perror("touch error");
-		exit(1);
-	}
-
-	else
-	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
-	}
-	return 1;
-}
-int runCP(char* s, char* d)
-{
-	pid_t pid;
-	int fd[2];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-		execl("/bin/cp","cp", s, d, NULL);
-		perror("cp error");
-		exit(1);
-	}
-
-	else
-	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
-	}
-	return 1;
-}
-
-int runEcho(char* arg)
-{
-	pid_t pid;
-	int fd[2];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-		execl("/bin/echo", "/bin/echo", arg, NULL);
-		perror("echo error");
-		exit(1);
-	}
-
-	else
-	{
-		int status;
-		close(fd[0]);
-		close(fd[1]);
-		waitpid(pid, &status, 0);
-	}
-	return 1;
-}
-
-int runPWD(void)
-{
-	pid_t pid;
-	int fd[2];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-		execl("/bin/pwd", "/bin/pwd", NULL, NULL);
-		perror("pwd error");
-		exit(1);
-	}
-
-	else
-	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
-	}
-	return 1;
-}
-	
-
 int yyerror(char *s)
 {
   printf("%s\n",s);
@@ -470,145 +322,11 @@ int runRemoveAlias(char *name)
 
 }
 
-int runLS(void)
-{
-	DIR* dir;
-  dir = opendir(".");
-  struct dirent* dp;
-  if(dir)
-  {
-  	while((dp = readdir(dir)) != NULL)
-    {
-    	printf("%s\t", dp -> d_name);
-    }
-		printf("\n");
-    closedir(dir);
-  }
-  else
-  	printf("The directory cannot be found");
-	return 1;
-}
-
-int runLSDIR(char* directory)
-{
-	pid_t pid;
-	int fd[1];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-		execl("/bin/ls", "ls", directory, NULL);
-		perror("ls error");
-		exit(1);
-	}
-
-	else
-	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
-	}
-}
-
-int runCAT(char* file)
-{
-	pid_t pid;
-	int fd[2];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-		execl("/bin/cat", "cat", file, NULL);
-		perror("cat error");
-		exit(1);
-	}
-
-	else
-	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
-	}
-	return 1;
-}
-
-int runWC(char* file)
-{
-	char ch;
-	int char_count = 0, word_count = 0, line_count = 0;
-	int in_word = 0;
-	int bytes;
-
-	FILE *fp;
-	fp = fopen(file, "r");
-
-	if(fp == NULL)
-	{
-		printf("Could not open the file %s\n", file);
-		return 1;
-	}
-
-	while ((ch = fgetc(fp)) != EOF)
-	{
-		char_count++;
-
-		if(ch == ' ' || ch == '\t' || ch == '\0' || ch == '\n')
-		{
-			if (in_word)
-			{
-				in_word = 0;
-				word_count++;
-			}
-
-			if(ch = '\0' || ch == '\n') line_count++;
-
-		}
-		else
-		{
-			in_word = 1;
-		}
-	}
-	fclose(fp);
-	fp = fopen(file, "r");
-	for(bytes = 0; getc(fp) != EOF; ++bytes);
-	printf("%d %d %d %s\n",line_count,word_count,bytes,file);
-
-	return 1;
-}
-
-int runMV(char* source, char* destination)
-{
-	pid_t pid;
-	int fd[2];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-		execl("/bin/mv","mv", source, destination, NULL);
-		perror("mv error");
-		exit(1);
-	}
-
-	else
-	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
-	}
-	return 1;
-}
-
 int runPipe(char* firstCom, char* firstArg, char* secondCom, char* secondArg)
 {
+	char* target1 = getPath(firstCom);
+	char* target2 = getPath(secondCom);
+
 	pid_t pid;
 	int fd[2];
 
@@ -620,7 +338,7 @@ int runPipe(char* firstCom, char* firstArg, char* secondCom, char* secondArg)
 		dup2(fd[1], STDOUT_FILENO);
 		close(fd[0]);
 		close(fd[1]);
-		execlp(firstCom, firstCom, firstArg, (char*) NULL);
+		execl(target1, firstCom, firstArg, (char*) NULL);
 		fprintf(stderr, "Failed to execute %s\n", firstCom);
 		exit(1);
 	}
@@ -633,7 +351,7 @@ int runPipe(char* firstCom, char* firstArg, char* secondCom, char* secondArg)
 				dup2(fd[0], STDIN_FILENO);
 				close(fd[1]);
 				close(fd[0]);
-				execl(secondCom, secondCom, secondArg,(char*) NULL);
+				execl(target2, secondCom, secondArg,(char*) NULL);
 				fprintf(stderr, "Failed to execute %s\n", secondCom);
 				exit(1);
 		}
@@ -647,16 +365,10 @@ int runPipe(char* firstCom, char* firstArg, char* secondCom, char* secondArg)
 	}
 }
 
-int getDateTime()
+int runNonBuiltin(char* command, char* arg)
 {
-	time_t T= time(NULL);
-	struct  tm tm = *localtime(&T);
-	printf("%02d/%02d/%04d %02d:%02d:%02d\n",tm.tm_mday, tm.tm_mon+1, tm.tm_year+1900,tm.tm_hour, tm.tm_min, tm.tm_sec);
-	return 1;
-}
+	char* target = getPath(command);
 
-int runSSH(char* address)
-{
 	pid_t pid;
 	int fd[1];
 
@@ -665,34 +377,9 @@ int runSSH(char* address)
 
 	if(pid == 0)
 	{
-		execl("ssh", "ssh", address, NULL);
-		printf("ssh: connect to host %s\n", address);
-		perror("Connection refused");
-		exit(1);
-	}
-
-	else
-	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
-	}
-}
-
-int runRemove(char* arg)
-{
-	pid_t pid;
-	int fd[2];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-		execl("/bin/rm", "/bin/rm", arg, NULL);
-		perror("rm error");
-		exit(1);
+			execl(target, command, arg, NULL);
+			perror("error");
+			exit(1);
 	}
 
 	else
@@ -703,4 +390,146 @@ int runRemove(char* arg)
 			waitpid(pid, &status, 0);
 	}
 	return 1;
+}
+
+int runNonBuiltInTwo(char* command, char* arg1, char* arg2)
+{
+	char* target = getPath(command);
+
+	pid_t pid;
+	int fd[1];
+	char* args[50] = {arg1, arg2};
+
+	pipe(fd);
+	pid = fork();
+
+	if(pid == 0)
+	{
+			execv(target, args);
+			perror("error");
+			exit(1);
+	}
+
+	else
+	{
+			int status;
+			close(fd[0]);
+			close(fd[1]);
+			waitpid(pid, &status, 0);
+	}
+	return 1;
+}
+
+int runNonBuiltInNone(char* command)
+{
+	char* target = getPath(command);
+
+	pid_t pid;
+	int fd[1];
+
+	pipe(fd);
+	pid = fork();
+
+	if(pid == 0)
+	{
+			execl(target, command, NULL);
+			perror("error");
+			exit(1);
+	}
+
+	else
+	{
+			int status;
+			close(fd[0]);
+			close(fd[1]);
+			waitpid(pid, &status, 0);
+	}
+	return 1;
+}
+
+int runNonBuiltInThree(char* command, char* arg1, char* arg2, char* arg3)
+{
+	char* target = getPath(command);
+
+	pid_t pid;
+	int fd[1];
+	char* args[50] = {arg1, arg2, arg3};
+
+	pipe(fd);
+	pid = fork();
+
+	if(pid == 0)
+	{
+			execv(target, args);
+			perror("error");
+			exit(1);
+	}
+
+	else
+	{
+			int status;
+			close(fd[0]);
+			close(fd[1]);
+			waitpid(pid, &status, 0);
+	}
+	return 1;
+}
+
+char* getPath(char* command)
+{
+	if(strcmp(command, "wc") == 0)
+		return "/usr/bin/wc";
+	else if(strcmp(command, "grep") == 0)
+		return "/usr/bin/grep";
+	else if(strcmp(command, "ls") == 0)
+		return "/bin/ls";
+	else if(strcmp(command, "rm") == 0)
+		return "/bin/rm";
+	else if(strcmp(command, "cp") == 0)
+		return "/bin/cp";
+	else if(strcmp(command, "cat") == 0)
+		return "/bin/cat";
+	else if(strcmp(command, "mkdir") == 0)
+		return "/bin/mkdir";
+	else if(strcmp(command, "rmdir") == 0)
+		return "/bin/rmdir";
+	else if(strcmp(command, "mv") == 0)
+		return "/usr/bin/mv";
+	else if(strcmp(command, "head") == 0)
+		return "/usr/bin/head";
+	else if(strcmp(command, "awk") == 0)
+		return "/usr/bin/awk";
+	else if(strcmp(command, "sort") == 0)
+		return "/usr/bin/sort";
+	else if(strcmp(command, "ssh") == 0)
+		return "/usr/bin/ssh";
+	else if(strcmp(command, "date") == 0)
+		return "/bin/date";
+	else if(strcmp(command, "ping") == 0)
+		return "/sbin/ping";
+	else if(strcmp(command, "tty") == 0)
+		return "/usr/bin/tty";
+	else if(strcmp(command, "rev") == 0)
+		return "/usr/bin/rev";
+	else if(strcmp(command, "echo") == 0)
+		return "/bin/echo";
+	else if(strcmp(command, "touch") == 0)
+		return "/bin/touch";
+	else if(strcmp(command, "pwd") == 0)
+		return "/bin/pwd";
+	else if(strcmp(command, "man") == 0)
+		return "usr/bin/man";
+}
+
+int contains(char* string, char character)
+{
+	for(int i = 0; i < strlen(string); i++)
+	{
+		if(string[i] == character)
+		{
+			return 1;
+		}
+	}
+
+	return 0;
 }
