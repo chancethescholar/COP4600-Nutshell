@@ -48,7 +48,7 @@ bool ifAlias(char* name)
 %x string_condition
 
 CHAR            [.A-Za-z0-9!\/_-][.A-Za-z0-9!\/_-]*
-ANYCHAR            [)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -]*
+ANYCHAR            [)(&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][)(&%$#@!`;,\.a-zA-Z0-9'/_=~ -]*
 
 %%
 
@@ -56,38 +56,38 @@ ANYCHAR            [)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~ -][)(*&%$#@!`;,\.a-zA-Z0-9'/*_
 <string_condition>[\"]          {BEGIN(INITIAL);}
 
 [ ]           { }
-setenv        { argc++; return SETENV; }
-printenv      { argc++; return PRINTENV; }
-unsetenv      { argc++; return UNSETENV; }
-cd                { argc++; return CD; }
-alias           { argc++; return ALIAS; }
-unalias       { argc++; return UNALIAS; }
+setenv				{ argc++; return SETENV; }
+printenv			{ argc++; return PRINTENV; }
+unsetenv			{ argc++; return UNSETENV; }
+cd		            { argc++; return CD; }
+alias		        { argc++; return ALIAS; }
+unalias				{ argc++; return UNALIAS; }
 bye                 { argc++; return BYE; }
-"\n"            { return END; }
+"\n"		        { return END; }
 [\"]                { BEGIN(string_condition); }
-"|"             { return PIPE; }
-{CHAR}+         {
+"|"		      		{ return PIPE; }
+{CHAR}+     		{
                   argc++;
-                  if(ifAlias(yytext) && argc == 1)
-                  {
-                    //alias expansion
-                    while(ifAlias(yytext))
-                    {
-                      char* yycopy = strdup(subAliases(yytext));
+      					  if(ifAlias(yytext) && argc == 1)
+      					  {
+        						//alias expansion
+        						while(ifAlias(yytext))
+        						{
+        						  char* yycopy = strdup(subAliases(yytext));
 
-                      for(int i = strlen(yycopy) - 1; i >= 0; --i)
-                        unput(yycopy[i]);
-                      free(yycopy);
+        						  for(int i = strlen(yycopy) - 1; i >= 0; --i)
+          							unput(yycopy[i]);
+          						free(yycopy);
 
                       strcpy(yytext, subAliases(strdup(yytext)));
-                    }
+        						}
                     argc++;
-                  }
+      					  }
 
-                  else
-                  {
-                    yylval.string = strdup(yytext);
-                    return STRING;
-                  }
-                }
+      					  else
+      					  {
+        						yylval.string = strdup(yytext);
+        						return STRING;
+      					  }
+    					  }
 %%

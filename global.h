@@ -56,3 +56,4 @@ int argc;
 
 char* getPath(char* command);
 int contains(char* string, char character);
+int wildcardLS(char* arg);
