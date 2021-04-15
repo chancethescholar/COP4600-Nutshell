@@ -255,11 +255,38 @@ void execute()
 		if(child == 0)
 		{
 			//child
-			char* path = getPath(commandTable[i].comName);
-			execv(path, commandTable[i].args); //execute non builtin command
+      char* fullPath = getenv("PATH");
+      struct stat buffer;
+      int exists;
+      char* fileOrDirectory = commandTable[i].comName;
+      char fullfilename[1024];
+      char *token = strtok(fullPath, ":");
 
-			perror(commandTable[i].comName);
-			_exit(1);
+      /* walk through other tokens */
+      while(token != NULL)
+      {
+          sprintf(fullfilename, "%s/%s", token, fileOrDirectory);
+          exists = stat(fullfilename, &buffer);
+          if(exists == 0 && (S_IFREG & buffer.st_mode))
+          {
+              execv(fullfilename, commandTable[i].args); //execute non builtin command
+              perror(commandTable[i].comName);
+              _exit(1);
+          }
+          token = strtok(NULL, ":"); /* next token */
+      }
+
+      if(exists != 0)
+      {
+        fprintf(stderr, "Error at line %d: %s command not found\n", yylineno, commandTable[i].comName);
+        perror(commandTable[i].comName);
+        _exit(1);
+      }
+			//char* path = getPath(commandTable[i].comName);
+			//execv(path, commandTable[i].args); //execute non builtin command
+
+			//perror(commandTable[i].comName);
+			//_exit(1);
 		}
 
 		else if(child < 0)

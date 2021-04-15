@@ -17,6 +17,8 @@
 #include <signal.h>
 #include <fnmatch.h>
 #include <dirent.h>
+#include <sys/stat.h>
+
 
 extern int yylineno;
 extern char** environ;

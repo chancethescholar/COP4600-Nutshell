@@ -1,0 +1,11 @@
+PWD=/Users/chanceonyiorah/Desktop/Spring 2021/COP4600/COP4600-Nutshell/testdir
+HOME=/Users/chanceonyiorah/Desktop/Spring 2021/COP4600/COP4600-Nutshell
+PROMPT=shell
+PATH=.:/bin:/usr/bin:/usr/local/bin:./testdir
+e=c
+this=.
+a=b
+b=c
+lo=jj
+jj=ls -al
+rot13=tr a-zA-Z n-za-mN-ZA-M
