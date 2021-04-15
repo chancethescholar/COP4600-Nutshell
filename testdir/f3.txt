@@ -1,5 +1,5 @@
-apple
-banana
-carrot
-banana
+apple 
+banana 
+carrot 
+banana 
 elk
