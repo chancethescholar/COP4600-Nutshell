@@ -14,6 +14,7 @@ For this project, Ishita worked on the environment variable section, implementin
 
 1) Tilda Expansion
 2) File name completion
+3) Wildcard Matching (only works with "?" wildcard)
 
 ## Implemented:
 
