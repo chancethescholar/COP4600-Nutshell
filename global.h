@@ -66,10 +66,6 @@ int argc;
 
 void yyerror(const char * s);
 int yylex();
-void execute(); //execute non built in commands using execv
-void reset();
-int containChar(char* string, char character);
-void escape(char* string);
 
 int runSetEnv(char* variable, char* word);
 int runPrintEnv();
@@ -81,7 +77,6 @@ int yylex();
 void execute(); //execute non built in commands using execv
 void reset();
 int containChar(char* string, char character);
-void escape(char* string);
 int runSetEnv(char* variable, char* word);
 int runPrintEnv();
 int runUnsetEnv(char *variable);

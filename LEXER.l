@@ -93,7 +93,7 @@ PATH			[:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~-][:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~-]*
                   else
                   {
   									yylval.string = strdup(yytext);
-  									escape(yylval.string);
+  									//escape(yylval.string);
                     envExpansion(yylval.string);
   									return STRING;
                   }

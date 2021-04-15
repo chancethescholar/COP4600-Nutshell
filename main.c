@@ -255,6 +255,7 @@ void execute()
 		if(child == 0)
 		{
 			//child
+			//source: https://stackoverflow.com/questions/28504133/c-finding-full-path-of-command
       char* fullPath = getenv("PATH");
       struct stat buffer;
       int exists;
@@ -334,18 +335,6 @@ int containChar(char* string, char character)
 		}
 	}
 	return 0;
-}
-
-void escape(char* string)
-{
-	char* origin = string;
-	char* final = string;
-	while(*origin)
-	{
-		*final = *origin++;
-		final += (*final != '\\' || *(final + 1) == '\\');
-	}
-	*final = '\0';
 }
 
 void reset()
