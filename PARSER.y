@@ -78,13 +78,14 @@ STRING {
 		glob_t pattern;
 		if(glob($1, 0, NULL, &pattern) == 0) //find match pattern
 		{
-			int num;
-			num = pattern.gl_pathc; //number of match pattern
+			int i = 0;
 
-			for(int i = 0; i < pattern.gl_pathc; i++) //add each match pattern to arguments in builtin command
+			while(i < pattern.gl_pathc) //number of match pattern
 			{
+				//add each match pattern to arguments in builtin command
 				commandTable[currentCommand].numArgs++;
-				commandTable[currentCommand].args[commandTable[currentCommand].numArgs]=strdup(pattern.gl_pathv[i]);
+				commandTable[currentCommand].args[commandTable[currentCommand].numArgs] = strdup(pattern.gl_pathv[i]);
+				i++;
 			}
 		}
 	}
@@ -93,7 +94,7 @@ STRING {
 	{
 		//no match pattern found, add *? pattern as argument
 		commandTable[currentCommand].numArgs++;
-		commandTable[currentCommand].args[commandTable[currentCommand].numArgs]=$1;
+		commandTable[currentCommand].args[commandTable[currentCommand].numArgs] = $1;
 	}
 };
 
