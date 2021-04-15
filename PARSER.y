@@ -1,217 +1,154 @@
 %{
-
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <sys/stat.h>
 #include <string.h>
-#include <limits.h>
-#include <sys/file.h>
 #include "global.h"
-
-int chdir();
-char* getcwd();
-
-int yylex(void);
-int yyerror(char *s);
-int runSetEnv(char* variable, char* word);
-int runPrintEnv();
-int runUnsetEnv(char *variable);
-int runCDnoargs(void);
-int runCD(char* arg);
-int runSetAlias(char *name, char *word);
-int runListAlias(void);
-int runRemoveAlias(char *name);
-int runLS(void);
-int runLSDIR(char* directory);
-int runCAT(char* file);
-int runWC(char* file);
-int runMV(char* source, char* destination);
-int runPipe(char* firstCom, char* firstArg, char* secondCom, char* secondArg);
-int getDateTime();
-int runSSH(char* address);
-int runRemove(char* arg);
-int runPWD(void);
-int runEcho(char* arg);
-int runCP(char* s, char* d);
-int runTOUCH(char* arg);
-int runGrep(char* arg, char* filename);
-
 
 Node* head = NULL;
 int aliasSize = 0;
+
+char* inFileName = NULL;  //in file description
+char* outFileName = NULL;	//out file description
+char* errFileName = NULL; //error file  description
+int openPermission = 0; //open option
+int background = 0; //check & for command in background
+
 %}
 
-%union {char *string;}
 
-%start cmd_line
-%token <string> STRING SETENV PRINTENV UNSETENV CD ALIAS UNALIAS BYE END LS PWD WC SORT PAGE CAT
-%token <string> CP MV PING PIPE DATE SSH RM echoo TOUCH GREP ENV GT LT GTGT ERROR1 BASH
+%token	<string> STRING
 
-%%
-cmd_line    :
-	BYE END									{exit(1); return 1; }
-	| SETENV STRING STRING END				{runSetEnv($2, $3); return 1;}
-	| PRINTENV END							{runPrintEnv(); return 1;}
-	| UNSETENV STRING END					{runUnsetEnv($2); return 1;}
-	| CD END								{runCDnoargs(); return 1;}
-	| CD STRING END							{runCD($2); return 1;}
-	| ALIAS STRING STRING END				{runSetAlias($2, $3); return 1;}
-	| ALIAS	END								{runListAlias(); return 1;}
-	| UNALIAS STRING END					{runRemoveAlias($2); return 1;}
-	| LS END								{runLS(); return 1;}
-	| LS STRING END							{runLSDIR($2); return 1;}
-	| PWD END 								{runPWD(); return 1;}
-	| WC STRING END 						{runWC($2); return 1;}
-	| SORT END 								{return 1;}
-	| PAGE END 								{return 1;}
-	| CAT STRING END 						{runCAT($2); return 1;}
-	| CP STRING STRING END 					{runCP($2,$3); return 1;}
-	| MV STRING STRING END 					{runMV($2,$3); return 1;}
-	| PING END								{printf("ping: usage error: Destination address required\n"); return 1;}
-	| STRING STRING PIPE STRING STRING END 	{runPipe($1, $2, $4, $5); return 1;}
-	| DATE END								{getDateTime(); return 1;}
-	| SSH STRING END						{runSSH($2); return 1;}
-	| RM STRING END							{runRemove($2); return 1;}
-	| echoo STRING END						{runEcho($2); return 1;}
-	| TOUCH STRING END						{runTOUCH($2); return 1;}
-	| GREP STRING STRING END				{runGrep($2, $3); return 1;}
-	| ENV STRING END						{printf("hello"); return 1; }
-	
+%token 	NOTOKEN END GT LT PIPE ERRORF ERROR1 AMP GTGT GTGTAMP GTAMP  TERMINATOR
+
+%union	{char *string;}
 
 %%
-int runGrep(char* arg, char* filename)
+
+
+complete_command:
+commands;
+
+commands:
+command
+| commands command;
+
+command:
+pipeline io_redirection background END
 {
-	pid_t pid;
-	int fd[2];
+	execute(); // execute complete command in command table
+}
 
-	pipe(fd);
-	pid = fork();
+| END { }
+| error END { yyerrok; };
 
-	if(pid == 0)
+pipeline:
+pipeline PIPE { currentCommand++; } //another new simple command create by increase command table array index
+command_arguments
+| command_arguments;
+
+command_arguments:
+command_word arguments { };
+
+arguments:
+arguments argument
+| //can be empty;
+argument:
+STRING {
+	if(containChar($1, '*') || containChar($1, '?')) //wildcard matching
 	{
-		execl("/bin/grep","grep", arg, filename, NULL);
-		perror("grep error");
-		exit(1);
+		glob_t pattern;
+		if(glob($1, 0, NULL, &pattern) == 0) //find match pattern
+		{
+			int num;
+			num = pattern.gl_pathc; //number of match pattern
+
+			for(int i = 0; i < pattern.gl_pathc; i++) //add each match pattern to arguments in builtin command
+			{
+				commandTable[currentCommand].numArgs++;
+				commandTable[currentCommand].args[commandTable[currentCommand].numArgs]=strdup(pattern.gl_pathv[i]);
+			}
+		}
 	}
 
 	else
 	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
+		//no match pattern found, add *? pattern as argument
+		commandTable[currentCommand].numArgs++;
+		commandTable[currentCommand].args[commandTable[currentCommand].numArgs]=$1;
 	}
-	return 1;
-}
-int runTOUCH(char* arg)
+};
+
+command_word:
+STRING
 {
-	pid_t pid;
-	int fd[2];
+	commandTable[currentCommand].comName = $1;
+	commandTable[currentCommand].args[0] = $1;
+	commandTable[currentCommand].numArgs = 0;
 
-	pipe(fd);
-	pid = fork();
+};
 
-	if(pid == 0)
-	{
-		execl("/bin/touch","touch", arg, NULL);
-		perror("touch error");
-		exit(1);
-	}
+io_redirection:
+io_redirection iodirect
+|; //can be empty
 
-	else
-	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
-	}
-	return 1;
-}
-int runCP(char* s, char* d)
+
+iodirect:
+GTGT STRING
 {
-	pid_t pid;
-	int fd[2];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-		execl("/bin/cp","cp", s, d, NULL);
-		perror("cp error");
-		exit(1);
-	}
-
-	else
-	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
-	}
-	return 1;
+	openPermission = O_WRONLY | O_CREAT | O_APPEND;
+	outFileName=$2;
 }
 
-int runEcho(char* arg)
+| GT STRING
 {
-	pid_t pid;
-	int fd[2];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-		execl("/bin/echo", "/bin/echo", arg, NULL);
-		perror("echo error");
-		exit(1);
-	}
-
-	else
-	{
-		int status;
-		close(fd[0]);
-		close(fd[1]);
-		waitpid(pid, &status, 0);
-	}
-	return 1;
+	openPermission = O_WRONLY  | O_TRUNC| O_CREAT;
+	outFileName=$2;
 }
 
-int runPWD(void)
+| GTGTAMP STRING
 {
-	pid_t pid;
-	int fd[2];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-		execl("/bin/pwd", "/bin/pwd", NULL, NULL);
-		perror("pwd error");
-		exit(1);
-	}
-
-	else
-	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
-	}
-	return 1;
+	openPermission = O_WRONLY  | O_CREAT| O_APPEND;
+	outFileName = $2;
+	errFileName = $2;
 }
-	
 
-int yyerror(char *s)
+| GTAMP STRING
 {
-  printf("%s\n",s);
-  return 0;
+	openPermission = O_WRONLY  | O_TRUNC| O_CREAT;
+	//outFileName = $2;
+	errFileName = $2;
 }
 
+| ERRORF STRING
+{
+	openPermission = O_WRONLY | O_TRUNC| O_CREAT;
+	errFileName = $2;
+}
+
+| ERROR1
+{
+	errFileName = "error";
+}
+
+| LT STRING
+{
+	inFileName = $2;
+};
+
+background:
+AMP
+{
+	background = 1;
+}
+|;
+%%
+
+void
+yyerror(const char * s)
+{
+
+	fprintf(stderr, "Error at line %d: %s!\n",yylineno,s);
+}
 
 int runSetEnv(char* variable, char* word)
 {
@@ -220,25 +157,25 @@ int runSetEnv(char* variable, char* word)
 		strcpy(varTable.word[0], word);
 		return 1;
 	}
-		
+
 	else if(strcmp(variable, "HOME") == 0)
 	{
 		strcpy(varTable.word[1], word);
 		return 1;
 	}
-		
+
 	else if(strcmp(variable, "PROMPT") == 0)
 	{
 		strcpy(varTable.word[2], word);
 		return 1;
 	}
-		
+
 	else if(strcmp(variable, "PATH") == 0)
 	{
 		strcpy(varTable.word[3], word);
 		return 1;
 	}
-		
+
 	setenv(variable, word, 1);
 	var_count++;
 	return 1;
@@ -247,12 +184,12 @@ int runSetEnv(char* variable, char* word)
 
 int runPrintEnv()
 {
-	for(int i = 0; i < varIndex; i++) 
+	for(int i = 0; i < varIndex; i++)
 	{
 		printf("%s=", varTable.var[i]);
 		printf("%s\n", varTable.word[i]);
 	}
-	
+
 	int count = 0;
 	int i = 0;
 	while(environ[i])
@@ -260,13 +197,13 @@ int runPrintEnv()
 		count++;
 		i++;
 	}
-	
+
 	i = count - var_count;
-	while(environ[i]) 
+	while(environ[i])
 	{
 	  printf("%s\n", environ[i++]);
 	}
-	
+
     return 1;
 }
 
@@ -277,53 +214,13 @@ int runUnsetEnv(char *variable)
 		fprintf(stderr, "Error: Cannot unset %s\n", variable);
 		return 0;
 	}
-		
+
 	unsetenv(variable);
 	var_count--;
 	return 1;
 }
 
-int runCDnoargs(void)
-{
-	int result = chdir(getenv("HOME"));
-	if(result != 0)
-	{
-		printf("No such directory");
-	}
-	return 1;
-}
-
-int runCD(char* arg)
-{
-	if (arg[0] != '/')
-	{ // arg is relative path
-		strcat(varTable.word[0], "/");
-		strcat(varTable.word[0], arg);
-
-		if(chdir(varTable.word[0]) == 0) {
-			return 1;
-		}
-		else {
-			getcwd(cwd, sizeof(cwd));
-			strcpy(varTable.word[0], cwd);
-			printf("Directory not found\n");
-			return 1;
-		}
-	}
-	else { // arg is absolute path
-		if(chdir(arg) == 0){
-			strcpy(varTable.word[0], arg);
-			return 1;
-		}
-		else {
-			printf("Directory not found\n");
-                        return 1;
-		}
-	}
-}
-
-int runSetAlias(char *name, char *word) 
-{
+int runSetAlias(char *name, char *word) {
 	if(strcmp(name, word) == 0)
 	{
 		printf("Error, expansion of \"%s\" would create a loop.\n", name);
@@ -421,8 +318,7 @@ int runRemoveAlias(char *name)
 {
 	if(aliasSize == 0) //if no aliases exist
 	{
-		fprintf(stderr, "Error: Alias %s not found\n", name);
-		return 0;
+		printf("Error: No alias %s found\n", name);
 	}
 
 	Node* current = head;
@@ -446,7 +342,6 @@ int runRemoveAlias(char *name)
 	else if(current -> next == NULL)
 	{
 		fprintf(stderr, "Error: Alias %s not found\n", name);
-		return 0;
 	}
 
 	else
@@ -464,243 +359,47 @@ int runRemoveAlias(char *name)
 			current = current -> next;
 		}
 		fprintf(stderr, "Error: Alias %s not found\n", name);
-		return 0;
 	}
 	return 1;
 
 }
 
-int runLS(void)
+int runCDnoargs(void)
 {
-	DIR* dir;
-  dir = opendir(".");
-  struct dirent* dp;
-  if(dir)
-  {
-  	while((dp = readdir(dir)) != NULL)
-    {
-    	printf("%s\t", dp -> d_name);
-    }
-		printf("\n");
-    closedir(dir);
-  }
-  else
-  	printf("The directory cannot be found");
-	return 1;
-}
-
-int runLSDIR(char* directory)
-{
-	pid_t pid;
-	int fd[1];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
+	int result = chdir(getenv("HOME"));
+	if(result != 0)
 	{
-		execl("/bin/ls", "ls", directory, NULL);
-		perror("ls error");
-		exit(1);
-	}
-
-	else
-	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
-	}
-}
-
-int runCAT(char* file)
-{
-	pid_t pid;
-	int fd[2];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-		execl("/bin/cat", "cat", file, NULL);
-		perror("cat error");
-		exit(1);
-	}
-
-	else
-	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
+		printf("No such directory");
 	}
 	return 1;
 }
 
-int runWC(char* file)
+int runCD(char* arg)
 {
-	char ch;
-	int char_count = 0, word_count = 0, line_count = 0;
-	int in_word = 0;
-	int bytes;
+	if (arg[0] != '/')
+	{ // arg is relative path
+		strcat(varTable.word[0], "/");
+		strcat(varTable.word[0], arg);
 
-	FILE *fp;
-	fp = fopen(file, "r");
-
-	if(fp == NULL)
-	{
-		printf("Could not open the file %s\n", file);
-		return 1;
-	}
-
-	while ((ch = fgetc(fp)) != EOF)
-	{
-		char_count++;
-
-		if(ch == ' ' || ch == '\t' || ch == '\0' || ch == '\n')
-		{
-			if (in_word)
-			{
-				in_word = 0;
-				word_count++;
-			}
-
-			if(ch = '\0' || ch == '\n') line_count++;
-
+		if(chdir(varTable.word[0]) == 0) {
+			return 1;
 		}
-		else
-		{
-			in_word = 1;
+		else {
+			getcwd(cwd, sizeof(cwd));
+			strcpy(varTable.word[0], cwd);
+			printf("Directory not found\n");
+			return 1;
 		}
 	}
-	fclose(fp);
-	fp = fopen(file, "r");
-	for(bytes = 0; getc(fp) != EOF; ++bytes);
-	printf("%d %d %d %s\n",line_count,word_count,bytes,file);
-
-	return 1;
-}
-
-int runMV(char* source, char* destination)
-{
-	pid_t pid;
-	int fd[2];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-		execl("/bin/mv","mv", source, destination, NULL);
-		perror("mv error");
-		exit(1);
-	}
-
-	else
-	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
-	}
-	return 1;
-}
-
-int runPipe(char* firstCom, char* firstArg, char* secondCom, char* secondArg)
-{
-	pid_t pid;
-	int fd[2];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-		dup2(fd[1], STDOUT_FILENO);
-		close(fd[0]);
-		close(fd[1]);
-		execlp(firstCom, firstCom, firstArg, (char*) NULL);
-		fprintf(stderr, "Failed to execute %s\n", firstCom);
-		exit(1);
-	}
-	else
-	{
-		pid = fork();
-
-		if(pid == 0)
-		{
-				dup2(fd[0], STDIN_FILENO);
-				close(fd[1]);
-				close(fd[0]);
-				execl(secondCom, secondCom, secondArg,(char*) NULL);
-				fprintf(stderr, "Failed to execute %s\n", secondCom);
-				exit(1);
+	else { // arg is absolute path
+		if(chdir(arg) == 0){
+			strcpy(varTable.word[0], arg);
+				return 1;
 		}
-		else
-		{
-				int status;
-				close(fd[0]);
-				close(fd[1]);
-				waitpid(pid, &status, 0);
+		else {
+			printf("Directory not found\n");
+        return 1;
 		}
-	}
-}
-
-int getDateTime()
-{
-	time_t T= time(NULL);
-	struct  tm tm = *localtime(&T);
-	printf("%02d/%02d/%04d %02d:%02d:%02d\n",tm.tm_mday, tm.tm_mon+1, tm.tm_year+1900,tm.tm_hour, tm.tm_min, tm.tm_sec);
-	return 1;
-}
-
-int runSSH(char* address)
-{
-	pid_t pid;
-	int fd[1];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-		execl("ssh", "ssh", address, NULL);
-		printf("ssh: connect to host %s\n", address);
-		perror("Connection refused");
-		exit(1);
-	}
-
-	else
-	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
-	}
-}
-
-int runRemove(char* arg)
-{
-	pid_t pid;
-	int fd[2];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-		execl("/bin/rm", "/bin/rm", arg, NULL);
-		perror("rm error");
-		exit(1);
-	}
-
-	else
-	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
 	}
 	return 1;
 }
