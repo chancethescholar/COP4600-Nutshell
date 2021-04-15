@@ -411,7 +411,7 @@ char* getPath(char* command)
 	else if(strcmp(command, "echo") == 0)
 		return "/bin/echo";
 	else if(strcmp(command, "touch") == 0)
-		return "/bin/touch";
+		return "/usr/bin/touch";
 	else if(strcmp(command, "pwd") == 0)
 		return "/bin/pwd";
 	else if(strcmp(command, "man") == 0)
