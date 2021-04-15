@@ -3,7 +3,7 @@
 ## Contributions:
 
 ### Chance Onyiorah: 
-For this project, Chance worked on the alias section, implementing the commands `alias name word`, `unalias name`, and `alias` and accounting for alias expansion. Chance also worked on implementing the following Non-built-in commands including `ls`, `sort`, `ssh`, `nm`, `date`, `tty`, `rmdir`, `head`, `tail`, `rev`, `awk`, `less` and `man`. She made sure to add these commands so that they ran in the background. Chance also implemented Pipes with Non-built-in commands and both Pipes and I/O Redirection, combined, with Non-built-in Commands.
+For this project, Chance worked on the alias section, implementing the commands `alias name word`, `unalias name`, and `alias` and accounting for alias expansion. Chance also worked on implementing the following Non-built-in commands including `ls`, `sort`, `ssh`, `nm`, `date`, `tty`, `rmdir`, `head`, `tail`, `rev`, `awk`, `less`, and `man`. She made sure to add these commands so that they ran in the background. Chance also implemented Pipes with Non-built-in commands and both Pipes and I/O Redirection, combined, with Non-built-in Commands.
 
 ### Ishita Gupta:
 For this project, Ishita worked on the environment variable section, implementing the commands `setenv variable word`, `unsetenv variable`, and `printenv` and accounting for environment variable expansion. Ishita also worked on implementing all the Non-built-in commands including `pwd`, `wc`, `cat`, `cp`, `page`, `mv`, `ping`, `echo`, `mkdir`, `rm`, `touch`, and `grep`. She made sure to add these commands so that they ran in the background. Ishita also implemeted Redirecting I/O with the Non-built-in commands and wildcard matching. 
