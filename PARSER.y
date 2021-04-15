@@ -1,160 +1,223 @@
 %{
-
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <sys/stat.h>
 #include <string.h>
-#include <limits.h>
-#include <sys/file.h>
 #include "global.h"
-
-int chdir();
-char* getcwd();
-
-int yylex(void);
-int yyerror(char *s);
-int runSetEnv(char* variable, char* word);
-int runPrintEnv(void);
-int runUnsetEnv(char *variable);
-int runCDnoargs(void);
-int runCD(char* arg);
-int runSetAlias(char *name, char *word);
-int runListAlias(void);
-int runRemoveAlias(char *name);
-int runPipe(char* firstCom, char* firstArg, char* secondCom, char* secondArg);
-int runNonBuiltin(char* command, char* arg);
-int runNonBuiltInTwo(char* command, char* arg1, char* arg2);
-int runNonBuiltInThree(char* command, char* arg1, char* arg2, char* arg3);
-int runNonBuiltInNone(char* command);
 
 Node* head = NULL;
 int aliasSize = 0;
+
+char* inFileName = NULL;  //in file description
+char* outFileName = NULL;	//out file description
+char* errFileName = NULL; //error file  description
+int openPermission = 0; //open option
+int background = 0; //check & for command in background
+
 %}
 
-%union {char *string;}
 
-%start cmd_line
-%token <string> STRING SETENV PRINTENV UNSETENV CD ALIAS UNALIAS BYE END LS PWD
-%token <string> WC SORT PAGE CAT CP MV PING PIPE DATE SSH RM echoo TOUCH GREP
+%token	<string> STRING
 
-%%
-cmd_line    :
-	BYE END									{exit(1); return 1; }
-	| SETENV STRING STRING END				{runSetEnv($2, $3); return 1;}
-	| PRINTENV END							{runPrintEnv(); return 1;}
-	| UNSETENV STRING END					{runUnsetEnv($2); return 1;}
-	| CD END								{runCDnoargs(); return 1;}
-	| CD STRING END							{runCD($2); return 1;}
-	| ALIAS STRING STRING END				{runSetAlias($2, $3); return 1;}
-	| ALIAS	END								{runListAlias(); return 1;}
-	| UNALIAS STRING END					{runRemoveAlias($2); return 1;}
-	| STRING STRING PIPE STRING STRING END 	{runPipe($1, $2, $4, $5); return 1;}
-	| STRING STRING END							{runNonBuiltin($1, $2); return 1;}
-	| STRING STRING STRING END			{runNonBuiltInTwo($1, $2, $3); return 1;}
-	| STRING STRING STRING STRING END			{runNonBuiltInThree($1, $2, $3, $4); return 1;}
-	| STRING END										{runNonBuiltInNone($1); return 1;}
+%token 	NOTOKEN END GT LT PIPE ERRORF ERROR1 AMP GTGT GTGTAMP GTAMP  TERMINATOR
+
+%union	{char *string;}
 
 %%
-int yyerror(char *s)
+
+
+complete_command:
+commands;
+
+commands:
+command
+| commands command;
+
+command:
+pipeline io_redirection background END
 {
-  printf("%s\n",s);
-  return 0;
+	execute(); // execute complete command in command table
 }
 
+| END { }
+| error END { yyerrok; };
+
+pipeline:
+pipeline PIPE { currentCommand++; } //another new simple command create by increase command table array index
+command_arguments
+| command_arguments;
+
+command_arguments:
+command_word arguments { };
+
+arguments:
+arguments argument
+| //can be empty;
+argument:
+STRING {
+	if(containChar($1, '*') || containChar($1, '?')) //wildcard matching
+	{
+		glob_t pattern;
+		if(glob($1, 0, NULL, &pattern) == 0) //find match pattern
+		{
+			int num;
+			num = pattern.gl_pathc; //number of match pattern
+
+			for(int i = 0; i < pattern.gl_pathc; i++) //add each match pattern to arguments in builtin command
+			{
+				commandTable[currentCommand].numArgs++;
+				commandTable[currentCommand].args[commandTable[currentCommand].numArgs]=strdup(pattern.gl_pathv[i]);
+			}
+		}
+	}
+
+	else
+	{
+		//no match pattern found, add *? pattern as argument
+		commandTable[currentCommand].numArgs++;
+		commandTable[currentCommand].args[commandTable[currentCommand].numArgs]=$1;
+	}
+};
+
+command_word:
+STRING
+{
+	commandTable[currentCommand].comName = $1;
+	commandTable[currentCommand].args[0] = $1;
+	commandTable[currentCommand].numArgs = 0;
+
+};
+
+io_redirection:
+io_redirection iodirect
+|; //can be empty
+
+
+iodirect:
+GTGT STRING
+{
+	openPermission = O_WRONLY | O_CREAT | O_APPEND;
+	outFileName=$2;
+}
+
+| GT STRING
+{
+	openPermission = O_WRONLY  | O_TRUNC| O_CREAT;
+	outFileName=$2;
+}
+
+| GTGTAMP STRING
+{
+	openPermission = O_WRONLY  | O_CREAT| O_APPEND;
+	outFileName = $2;
+	errFileName = $2;
+}
+
+| GTAMP STRING
+{
+	openPermission = O_WRONLY  | O_TRUNC| O_CREAT;
+	//outFileName = $2;
+	errFileName = $2;
+}
+
+| ERRORF STRING
+{
+	openPermission = O_WRONLY | O_TRUNC| O_CREAT;
+	errFileName = $2;
+}
+
+| ERROR1
+{
+	errFileName = "error";
+}
+
+| LT STRING
+{
+	inFileName = $2;
+};
+
+background:
+AMP
+{
+	background = 1;
+}
+|;
+%%
+
+void
+yyerror(const char * s)
+{
+
+	fprintf(stderr, "Error at line %d: %s!\n",yylineno,s);
+}
 
 int runSetEnv(char* variable, char* word)
 {
-	if(strcmp(variable, word) == 0)
+	if(strcmp(variable, "PWD") == 0)
 	{
-		printf("Error, expansion of \"%s\" would create a loop.\n", variable);
+		strcpy(varTable.word[0], word);
 		return 1;
 	}
 
-	for (int i = 0; i < varIndex; i++)
+	else if(strcmp(variable, "HOME") == 0)
 	{
-		if((strcmp(varTable.var[i], variable) == 0) && (strcmp(varTable.word[i], word) == 0)){
-			printf("Error, expansion of \"%s\" would create a loop.\n", variable);
-			return 1;
-		}
-		else if(strcmp(varTable.var[i], variable) == 0) {
-			strcpy(varTable.word[i], word);
-			return 1;
-		}
+		strcpy(varTable.word[1], word);
+		return 1;
 	}
-	strcpy(varTable.var[varIndex], variable);
-	strcpy(varTable.word[varIndex], word);
-	varIndex++;
 
+	else if(strcmp(variable, "PROMPT") == 0)
+	{
+		strcpy(varTable.word[2], word);
+		return 1;
+	}
+
+	else if(strcmp(variable, "PATH") == 0)
+	{
+		strcpy(varTable.word[3], word);
+		return 1;
+	}
+
+	setenv(variable, word, 1);
+	var_count++;
 	return 1;
 
 }
 
-int runPrintEnv(void)
+int runPrintEnv()
 {
-	for(int i = 0; i < varIndex; i++) {
+	for(int i = 0; i < varIndex; i++)
+	{
 		printf("%s=", varTable.var[i]);
 		printf("%s\n", varTable.word[i]);
 	}
-	return 1;
+
+	int count = 0;
+	int i = 0;
+	while(environ[i])
+	{
+		count++;
+		i++;
+	}
+
+	i = count - var_count;
+	while(environ[i])
+	{
+	  printf("%s\n", environ[i++]);
+	}
+
+    return 1;
 }
 
 int runUnsetEnv(char *variable)
 {
-	char reset[100];
-	for(int i = 0; i < varIndex; i++)
+	if(strcmp(variable, "PWD") == 0 || strcmp(variable, "HOME") == 0 || strcmp(variable, "PROMPT") == 0 || strcmp(variable, "PATH") == 0)
 	{
-		if(strcmp(varTable.var[i], variable ) == 0)
-		{
-			strcpy(varTable.var[i], reset);
-			strcpy(varTable.word[i], reset);
-			varIndex--;
-			return 1;
-		}
+		fprintf(stderr, "Error: Cannot unset %s\n", variable);
+		return 0;
 	}
-	printf("Error, %s not found.\n", variable);
+
+	unsetenv(variable);
+	var_count--;
 	return 1;
-}
-
-int runCDnoargs(void)
-{
-	int result = chdir(getenv("HOME"));
-	if(result != 0)
-	{
-		printf("No such directory");
-	}
-	return 1;
-}
-
-int runCD(char* arg)
-{
-	if (arg[0] != '/')
-	{ // arg is relative path
-		strcat(varTable.word[0], "/");
-		strcat(varTable.word[0], arg);
-
-		if(chdir(varTable.word[0]) == 0) {
-			return 1;
-		}
-		else {
-			getcwd(cwd, sizeof(cwd));
-			strcpy(varTable.word[0], cwd);
-			printf("Directory not found\n");
-			return 1;
-		}
-	}
-	else { // arg is absolute path
-		if(chdir(arg) == 0){
-			strcpy(varTable.word[0], arg);
-			return 1;
-		}
-		else {
-			printf("Directory not found\n");
-                        return 1;
-		}
-	}
 }
 
 int runSetAlias(char *name, char *word) {
@@ -301,257 +364,41 @@ int runRemoveAlias(char *name)
 
 }
 
-int runPipe(char* firstCom, char* firstArg, char* secondCom, char* secondArg)
+int runCDnoargs(void)
 {
-	char* target1 = getPath(firstCom);
-	char* target2 = getPath(secondCom);
-
-	pid_t pid;
-	int fd[2];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
+	int result = chdir(getenv("HOME"));
+	if(result != 0)
 	{
-		dup2(fd[1], STDOUT_FILENO);
-		close(fd[0]);
-		close(fd[1]);
-		execl(target1, firstCom, firstArg, (char*) NULL);
-		fprintf(stderr, "Failed to execute %s\n", firstCom);
-		exit(1);
+		printf("No such directory");
 	}
-	else
-	{
-		pid = fork();
+	return 1;
+}
 
-		if(pid == 0)
-		{
-				dup2(fd[0], STDIN_FILENO);
-				close(fd[1]);
-				close(fd[0]);
-				execl(target2, secondCom, secondArg,(char*) NULL);
-				fprintf(stderr, "Failed to execute %s\n", secondCom);
-				exit(1);
+int runCD(char* arg)
+{
+	if (arg[0] != '/')
+	{ // arg is relative path
+		strcat(varTable.word[0], "/");
+		strcat(varTable.word[0], arg);
+
+		if(chdir(varTable.word[0]) == 0) {
+			return 1;
 		}
-		else
-		{
-				int status;
-				close(fd[0]);
-				close(fd[1]);
-				waitpid(pid, &status, 0);
-		}
-	}
-}
-
-int runNonBuiltin(char* command, char* arg)
-{
-	if(contains(arg, '*.'))
-	{
-		wildcardLS(arg);
-		return 1;
-	}
-
-	char* target = getPath(command);
-
-	pid_t pid;
-	int fd[1];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-			execl(target, command, arg, NULL);
-			perror("error");
-			exit(1);
-	}
-
-	else
-	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
-	}
-	return 1;
-}
-
-int runNonBuiltInTwo(char* command, char* arg1, char* arg2)
-{
-	char* target = getPath(command);
-
-	pid_t pid;
-	int fd[1];
-	char* args[50] = {arg1, arg2};
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-			execv(target, args);
-			perror("error");
-			exit(1);
-	}
-
-	else
-	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
-	}
-	return 1;
-}
-
-int runNonBuiltInNone(char* command)
-{
-	char* target = getPath(command);
-
-	pid_t pid;
-	int fd[1];
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-			execl(target, command, NULL);
-			perror("error");
-			exit(1);
-	}
-
-	else
-	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
-	}
-	return 1;
-}
-
-int runNonBuiltInThree(char* command, char* arg1, char* arg2, char* arg3)
-{
-	char* target = getPath(command);
-
-	pid_t pid;
-	int fd[1];
-	char* args[50] = {arg1, arg2, arg3};
-
-	pipe(fd);
-	pid = fork();
-
-	if(pid == 0)
-	{
-			execv(target, args);
-			perror("error");
-			exit(1);
-	}
-
-	else
-	{
-			int status;
-			close(fd[0]);
-			close(fd[1]);
-			waitpid(pid, &status, 0);
-	}
-	return 1;
-}
-
-char* getPath(char* command)
-{
-	if(strcmp(command, "wc") == 0)
-		return "/usr/bin/wc";
-	else if(strcmp(command, "grep") == 0)
-		return "/usr/bin/grep";
-	else if(strcmp(command, "ls") == 0)
-		return "/bin/ls";
-	else if(strcmp(command, "rm") == 0)
-		return "/bin/rm";
-	else if(strcmp(command, "cp") == 0)
-		return "/bin/cp";
-	else if(strcmp(command, "cat") == 0)
-		return "/bin/cat";
-	else if(strcmp(command, "mkdir") == 0)
-		return "/bin/mkdir";
-	else if(strcmp(command, "rmdir") == 0)
-		return "/bin/rmdir";
-	else if(strcmp(command, "mv") == 0)
-		return "/usr/bin/mv";
-	else if(strcmp(command, "head") == 0)
-		return "/usr/bin/head";
-	else if(strcmp(command, "awk") == 0)
-		return "/usr/bin/awk";
-	else if(strcmp(command, "sort") == 0)
-		return "/usr/bin/sort";
-	else if(strcmp(command, "ssh") == 0)
-		return "/usr/bin/ssh";
-	else if(strcmp(command, "date") == 0)
-		return "/bin/date";
-	else if(strcmp(command, "ping") == 0)
-		return "/sbin/ping";
-	else if(strcmp(command, "tty") == 0)
-		return "/usr/bin/tty";
-	else if(strcmp(command, "rev") == 0)
-		return "/usr/bin/rev";
-	else if(strcmp(command, "echo") == 0)
-		return "/bin/echo";
-	else if(strcmp(command, "touch") == 0)
-		return "/bin/touch";
-	else if(strcmp(command, "pwd") == 0)
-		return "/bin/pwd";
-	else if(strcmp(command, "man") == 0)
-		return "usr/bin/man";
-}
-
-int contains(char* string, char character)
-{
-	for(int i = 0; i < strlen(string); i++)
-	{
-		if(string[i] == character)
-		{
-			//printf("%s\n", string[i]);
+		else {
+			getcwd(cwd, sizeof(cwd));
+			strcpy(varTable.word[0], cwd);
+			printf("Directory not found\n");
 			return 1;
 		}
 	}
-
-	return 0;
-}
-
-int wildcardLS(char* arg)
-{
-	if(contains(arg, '*.'))
-	{
-		char* extension = strtok(arg, ".");
-
-		DIR *d;
-		d = opendir(".");
-		char *p;
-		struct dirent *dir;
-
-		if(d)
-		{
-				while((dir = readdir(d)) != NULL)
-				{
-						p = strtok(dir -> d_name, ".");
-						p = strtok(NULL, ".");
-						if(p != NULL)
-						{
-							if(strcmp(p, extension) == 0)
-							{
-									char* filename[50];
-									strcat(filename, dir -> d_name);
-									strcat(filename, ".");
-									strcat(filename, p);
-									printf("\t%s", filename);
-									strcpy(filename, "");
-							}
-						}
-				}
-				printf("\n");
-				closedir(d);
+	else { // arg is absolute path
+		if(chdir(arg) == 0){
+			strcpy(varTable.word[0], arg);
+				return 1;
+		}
+		else {
+			printf("Directory not found\n");
+        return 1;
 		}
 	}
 	return 1;
