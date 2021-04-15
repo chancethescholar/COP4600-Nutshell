@@ -16,6 +16,7 @@ int main()
 
     aliasIndex = 0;
     varIndex = 0;
+    var_count = 0;
 
     getcwd(cwd, sizeof(cwd));
 
@@ -164,8 +165,9 @@ void execute()
 
 		else if(strcmp(commandTable[i].comName, "setenv") == 0)
 		{
-			if(commandTable[i].args[1] != NULL && commandTable[i].args[2] != NULL && commandTable[i].args[3] == NULL){
-				runSetEnv(commandTable[i].args[1],commandTable[i].args[2]);
+			if(commandTable[i].args[1] != NULL && commandTable[i].args[2] != NULL && commandTable[i].args[3] == NULL)
+      {
+				runSetEnv(commandTable[i].args[1], commandTable[i].args[2]);
 			}
 
 			else
