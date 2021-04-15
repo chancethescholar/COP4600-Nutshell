@@ -73,6 +73,16 @@ int runSetEnv(char* variable, char* word);
 int runPrintEnv();
 int runUnsetEnv(char *variable);
 int var_count;
+
+void yyerror(const char * s);
+int yylex();
+void execute(); //execute non built in commands using execv
+void reset();
+int containChar(char* string, char character);
+void escape(char* string);
+int runSetEnv(char* variable, char* word);
+int runPrintEnv();
+int runUnsetEnv(char *variable);
 char* envExpansion(char* arg);
 int runSetAlias(char *name, char *word);
 int runListAlias(void);

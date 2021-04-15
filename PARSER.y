@@ -4,6 +4,25 @@
 #include <string.h>
 #include "global.h"
 
+int chdir();
+char* getcwd();
+
+int yylex(void);
+void yyerror(const char *s);
+int runSetEnv(char* variable, char* word);
+int runPrintEnv();
+int runUnsetEnv(char *variable);
+int runCDnoargs(void);
+int runCD(char* arg);
+int runSetAlias(char *name, char *word);
+int runListAlias(void);
+int runRemoveAlias(char *name);
+int runPipe(char* firstCom, char* firstArg, char* secondCom, char* secondArg);
+int runNonBuiltin(char* command, char* arg);
+int runNonBuiltInTwo(char* command, char* arg1, char* arg2);
+int runNonBuiltInThree(char* command, char* arg1, char* arg2, char* arg3);
+int runNonBuiltInNone(char* command);
+
 Node* head = NULL;
 int aliasSize = 0;
 
@@ -157,7 +176,10 @@ int runSetEnv(char* variable, char* word)
 		strcpy(varTable.word[0], word);
 		return 1;
 	}
+<<<<<<< HEAD
 
+=======
+>>>>>>> 4cc46ae969e15ba8ab859790a701ca4ca93cf764
 	else if(strcmp(variable, "HOME") == 0)
 	{
 		strcpy(varTable.word[1], word);
@@ -175,7 +197,10 @@ int runSetEnv(char* variable, char* word)
 		strcpy(varTable.word[3], word);
 		return 1;
 	}
+<<<<<<< HEAD
 
+=======
+>>>>>>> 4cc46ae969e15ba8ab859790a701ca4ca93cf764
 	setenv(variable, word, 1);
 	var_count++;
 	return 1;
@@ -220,7 +245,13 @@ int runUnsetEnv(char *variable)
 	return 1;
 }
 
+<<<<<<< HEAD
 int runSetAlias(char *name, char *word) {
+=======
+
+int runSetAlias(char *name, char *word)
+{
+>>>>>>> 4cc46ae969e15ba8ab859790a701ca4ca93cf764
 	if(strcmp(name, word) == 0)
 	{
 		printf("Error, expansion of \"%s\" would create a loop.\n", name);

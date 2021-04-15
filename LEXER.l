@@ -54,6 +54,7 @@ PATH			[:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~-][:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~-]*
 <string_condition>{ANYCHAR}+    { yylval.string = strdup(yytext); return STRING;}
 <string_condition>[\"]          { BEGIN(INITIAL);}
 [$][{]{CHAR}+[}]				{ argc++; yylval.string = envExpansion(yytext); return STRING;}
+["][$][{]{CHAR}+[}]["]          { argc++; yylval.string = envExpansion(yytext); return STRING;}
 
 
 [ ]		{ }
@@ -69,6 +70,7 @@ PATH			[:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~-][:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~-]*
 "2>&1"	{return ERROR1;}
 "&" 	{ return AMP;}
 [\t]	{ }	//ignore tab
+<<EOF>> {exit(0);}
 
 {CHAR}+     		{
                   argc++;
@@ -78,19 +80,22 @@ PATH			[:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~-][:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~-]*
         						//alias expansion
 										while(ifAlias(yytext))
         						{
-        						  //char* yycopy = strdup(subAliases(yytext));
+        						  char* yycopy = strdup(subAliases(yytext));
 
-        						  //for(int i = strlen(yycopy) - 1; i >= 0; --i)
-          							//unput(yycopy[i]);
-          						//free(yycopy);
+        						  for(int i = strlen(yycopy) - 1; i >= 0; --i)
+          							unput(yycopy[i]);
+          						free(yycopy);
 
                       strcpy(yytext, subAliases(strdup(yytext)));
         						}
       					  }
 
-									yylval.string = strdup(yytext);
-									escape(yylval.string);
-									return STRING;
+                  else
+                  {
+  									yylval.string = strdup(yytext);
+  									escape(yylval.string);
+  									return STRING;
+                  }
     					  }
 
 {PATH}+				{yylval.string = strdup(yytext); return STRING;}
