@@ -69,6 +69,7 @@ PATH			[:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~-][:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~-]*
 "2>&1"	{return ERROR1;}
 "&" 	{ return AMP;}
 [\t]	{ }	//ignore tab
+<<EOF>> {exit(0);}
 
 {CHAR}+     		{
                   argc++;

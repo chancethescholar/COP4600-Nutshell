@@ -421,4 +421,6 @@ char* getPath(char* command)
 		return "/usr/bin/nm";
 	else if(strcmp(command, "tail") == 0)
 		return "/usr/bin/tail";
+  else if(strcmp(command, "less") == 0)
+  	return "/usr/bin/less";
 }
