@@ -8,7 +8,7 @@ int chdir();
 char* getcwd();
 
 int yylex(void);
-int yyerror(char *s);
+void yyerror(const char *s);
 int runSetEnv(char* variable, char* word);
 int runPrintEnv();
 int runUnsetEnv(char *variable);
@@ -237,19 +237,6 @@ int runUnsetEnv(char *variable)
 	return 1;
 }
 
-
-int runUnsetEnv(char *variable)
-{
-	if(strcmp(variable, "PWD") == 0 || strcmp(variable, "HOME") == 0 || strcmp(variable, "PROMPT") == 0 || strcmp(variable, "PATH") == 0)
-	{
-		fprintf(stderr, "Error: Cannot unset %s\n", variable);
-		return 0;
-	}
-
-	unsetenv(variable);
-	var_count--;
-	return 1;
-}
 
 int runSetAlias(char *name, char *word) 
 {
