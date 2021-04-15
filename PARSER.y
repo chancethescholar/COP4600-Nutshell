@@ -37,14 +37,14 @@ int background = 0; //check & for command in background
 
 %token	<string> STRING
 
-%token 	NOTOKEN END GT LT PIPE ERRORF ERROR1 AMP GTGT GTGTAMP GTAMP  TERMINATOR
+%token END GT LT PIPE ERRORF ERROR1 AMP GTGT GTGTAMP GTAMP
 
 %union	{char *string;}
 
 %%
 
 
-complete_command:
+fullCommand:
 commands;
 
 commands:
@@ -52,7 +52,7 @@ command
 | commands command;
 
 command:
-pipeline io_redirection background END
+pipeline ioRedirection background END
 {
 	execute(); // execute complete command in command table
 }
@@ -62,11 +62,11 @@ pipeline io_redirection background END
 
 pipeline:
 pipeline PIPE { currentCommand++; } //another new simple command create by increase command table array index
-command_arguments
-| command_arguments;
+commandArgs
+| commandArgs;
 
-command_arguments:
-command_word arguments { };
+commandArgs:
+commandString arguments { };
 
 arguments:
 arguments argument
@@ -97,7 +97,7 @@ STRING {
 	}
 };
 
-command_word:
+commandString:
 STRING
 {
 	commandTable[currentCommand].comName = $1;
@@ -106,8 +106,8 @@ STRING
 
 };
 
-io_redirection:
-io_redirection iodirect
+ioRedirection:
+ioRedirection iodirect
 |; //can be empty
 
 
@@ -176,10 +176,6 @@ int runSetEnv(char* variable, char* word)
 		strcpy(varTable.word[0], word);
 		return 1;
 	}
-<<<<<<< HEAD
-
-=======
->>>>>>> 4cc46ae969e15ba8ab859790a701ca4ca93cf764
 	else if(strcmp(variable, "HOME") == 0)
 	{
 		strcpy(varTable.word[1], word);
@@ -197,10 +193,6 @@ int runSetEnv(char* variable, char* word)
 		strcpy(varTable.word[3], word);
 		return 1;
 	}
-<<<<<<< HEAD
-
-=======
->>>>>>> 4cc46ae969e15ba8ab859790a701ca4ca93cf764
 	setenv(variable, word, 1);
 	var_count++;
 	return 1;
@@ -245,13 +237,9 @@ int runUnsetEnv(char *variable)
 	return 1;
 }
 
-<<<<<<< HEAD
-int runSetAlias(char *name, char *word) {
-=======
 
 int runSetAlias(char *name, char *word)
 {
->>>>>>> 4cc46ae969e15ba8ab859790a701ca4ca93cf764
 	if(strcmp(name, word) == 0)
 	{
 		printf("Error, expansion of \"%s\" would create a loop.\n", name);
@@ -349,7 +337,8 @@ int runRemoveAlias(char *name)
 {
 	if(aliasSize == 0) //if no aliases exist
 	{
-		printf("Error: No alias %s found\n", name);
+		fprintf(stderr, "Error: Alias %s not found\n", name);
+		return 0;
 	}
 
 	Node* current = head;
@@ -373,6 +362,7 @@ int runRemoveAlias(char *name)
 	else if(current -> next == NULL)
 	{
 		fprintf(stderr, "Error: Alias %s not found\n", name);
+		return 0;
 	}
 
 	else
@@ -390,6 +380,7 @@ int runRemoveAlias(char *name)
 			current = current -> next;
 		}
 		fprintf(stderr, "Error: Alias %s not found\n", name);
+		return 0;
 	}
 	return 1;
 

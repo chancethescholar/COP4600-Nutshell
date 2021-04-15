@@ -16,20 +16,29 @@ int main()
 
     aliasIndex = 0;
     varIndex = 0;
+	var_count = 0;
 
     getcwd(cwd, sizeof(cwd));
 
+
     strcpy(varTable.var[varIndex], "PWD");
     strcpy(varTable.word[varIndex], cwd);
+	setenv("PWD", cwd, 0);
     varIndex++;
+
     strcpy(varTable.var[varIndex], "HOME");
     strcpy(varTable.word[varIndex], cwd);
+	setenv("HOME", cwd, 0);
     varIndex++;
+
     strcpy(varTable.var[varIndex], "PROMPT");
     strcpy(varTable.word[varIndex], "shell");
+	setenv("PROMPT", "shell", 0);
     varIndex++;
+
     strcpy(varTable.var[varIndex], "PATH");
     strcpy(varTable.word[varIndex], ".:/bin");
+	setenv("PATH", ".:/bin", 0);
     varIndex++;
 
     system("clear");
@@ -164,14 +173,9 @@ void execute()
 
 		else if(strcmp(commandTable[i].comName, "setenv") == 0)
 		{
-<<<<<<< HEAD
-			if(commandTable[i].args[1] != NULL && commandTable[i].args[2] != NULL && commandTable[i].args[3] == NULL){
-				runSetEnv(commandTable[i].args[1],commandTable[i].args[2]);
-=======
 			if(commandTable[i].args[1] != NULL && commandTable[i].args[2] != NULL && commandTable[i].args[3] == NULL)
       {
 				runSetEnv(commandTable[i].args[1], commandTable[i].args[2]);
->>>>>>> 4cc46ae969e15ba8ab859790a701ca4ca93cf764
 			}
 
 			else
@@ -408,11 +412,7 @@ char* getPath(char* command)
 	else if(strcmp(command, "echo") == 0)
 		return "/bin/echo";
 	else if(strcmp(command, "touch") == 0)
-<<<<<<< HEAD
-		return "/bin/touch";
-=======
 		return "/usr/bin/touch";
->>>>>>> 4cc46ae969e15ba8ab859790a701ca4ca93cf764
 	else if(strcmp(command, "pwd") == 0)
 		return "/bin/pwd";
 	else if(strcmp(command, "man") == 0)
@@ -421,9 +421,9 @@ char* getPath(char* command)
 		return "/usr/bin/nm";
 	else if(strcmp(command, "tail") == 0)
 		return "/usr/bin/tail";
-<<<<<<< HEAD
-=======
   else if(strcmp(command, "less") == 0)
   	return "/usr/bin/less";
->>>>>>> 4cc46ae969e15ba8ab859790a701ca4ca93cf764
+  else if(strcmp(command, "tee") == 0)
+    return "/usr/bin/tee";
+  return "not found";
 }
