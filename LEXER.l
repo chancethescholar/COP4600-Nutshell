@@ -78,19 +78,22 @@ PATH			[:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~-][:)(*&%$#@!`;,\.a-zA-Z0-9'/*_=~-]*
         						//alias expansion
 										while(ifAlias(yytext))
         						{
-        						  //char* yycopy = strdup(subAliases(yytext));
+        						  char* yycopy = strdup(subAliases(yytext));
 
-        						  //for(int i = strlen(yycopy) - 1; i >= 0; --i)
-          							//unput(yycopy[i]);
-          						//free(yycopy);
+        						  for(int i = strlen(yycopy) - 1; i >= 0; --i)
+          							unput(yycopy[i]);
+          						free(yycopy);
 
                       strcpy(yytext, subAliases(strdup(yytext)));
         						}
       					  }
 
-									yylval.string = strdup(yytext);
-									escape(yylval.string);
-									return STRING;
+                  else
+                  {
+  									yylval.string = strdup(yytext);
+  									escape(yylval.string);
+  									return STRING;
+                  }
     					  }
 
 {PATH}+				{yylval.string = strdup(yytext); return STRING;}
