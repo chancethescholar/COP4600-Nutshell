@@ -20,7 +20,7 @@ For this project, Ishita worked on the environment variable section, implementin
 ## Implemented:
 
 1) Built-in commands: `alias name word`, `unalias name`, `alias`, `setenv variable word`, `unsetenv variable`, `printenv`, `cd`, `bye`
-2) Non-built-in commands: `ls`, `sort`, `ssh`, `nm`, `date`, `tty`, `rmdir`, `head`, `tail`, `rev`, `awk`, `man`, `pwd`, `wc`, `cat`, `cp`, `page`, `mv`, `ping`, `echo`, `mkdir`, `rm`, `touch`, and `grep`. 
+2) Non-built-in commands: `ls`, `sort`, `ssh`, `nm`, `date`, `tty`, `rmdir`, `head`, `tail`, `rev`, `awk`, `man`, `pwd`, `wc`, `cat`, `cp`, `page`, `mv`, `ping`, `echo`, `mkdir`, `rm`, `touch`,`tee`, and `grep`. 
 3) Alias expansion
 4) Environment variable expansion
 5) Redirecting I/O with Non-built-in Commands
