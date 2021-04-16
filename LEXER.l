@@ -7,36 +7,61 @@ int argc = 0;
 
 char* envExpansion(char* arg)
 {
-	char sub[1000];
+    char sub[1000];
 
-	int size = 0;
-	while(arg[size] != '\0')
-	{
-		size++;
-	}
+    int size = 0;
+    while(arg[size] != '\0')
+    {
+        size++;
+    }
 
-	int position = 2, temp = 0;
-	while (temp < size - 3)
-	{
-		sub[temp] = arg[position+temp];
-		temp++;
-	}
-	sub[temp] = '\0';
+    if(arg[0] == '\"')
+    {
+        int position = 3, temp = 0;
+        while (temp < size - 5)
+        {
+            sub[temp] = arg[position+temp];
+            temp++;
+        }
+        sub[temp] = '\0';
 
 
-	if(strcmp(sub, "PWD") == 0)
-		return varTable.word[0];
+        if(strcmp(sub, "PWD") == 0)
+            return varTable.word[0];
 
-	else if(strcmp(sub, "HOME") == 0)
-		return varTable.word[1];
+        else if(strcmp(sub, "HOME") == 0)
+            return varTable.word[1];
 
-	else if(strcmp(sub, "PROMPT") == 0)
-		return varTable.word[2];
+        else if(strcmp(sub, "PROMPT") == 0)
+            return varTable.word[2];
 
-	else if(strcmp(sub, "PATH") == 0)
-		return varTable.word[3];
+        else if(strcmp(sub, "PATH") == 0)
+            return varTable.word[3];
+    }
+    else
+    {
+        int position = 2, temp = 0;
+        while (temp < size - 3)
+        {
+            sub[temp] = arg[position+temp];
+            temp++;
+        }
+        sub[temp] = '\0';
 
-	return getenv(sub);
+
+        if(strcmp(sub, "PWD") == 0)
+            return varTable.word[0];
+
+        else if(strcmp(sub, "HOME") == 0)
+            return varTable.word[1];
+
+        else if(strcmp(sub, "PROMPT") == 0)
+            return varTable.word[2];
+
+        else if(strcmp(sub, "PATH") == 0)
+            return varTable.word[3];
+    }
+    return getenv(sub);
 }
 %}
 
